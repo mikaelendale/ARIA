@@ -1,0 +1,34 @@
+---
+description: Apply Laravel AI SDK conventions and multi-agent workflow patterns
+alwaysApply: true
+---
+
+# Laravel AI SDK Guide Rule
+
+Use this rule whenever implementing or reviewing AI features in this project.
+
+## Core Conventions
+
+- Prefer dedicated agent classes for reusable behavior; use anonymous `agent()` only for one-off tasks.
+- Use structured output (`schema`) for any response consumed by code paths, branching, or persistence.
+- Keep instructions narrow and role-specific; one responsibility per agent or tool.
+- Use `Lab` enum / provider attributes for provider selection and failover over hardcoded strings.
+- Implement conversation memory with `RemembersConversations` + `forUser()` / `continue()` when chat continuity matters.
+
+## Tools and Workflows
+
+- Put non-trivial side effects behind SDK tools (`Tool` contract with strict `schema`).
+- Use provider tools intentionally (`WebSearch`, `WebFetch`, `FileSearch`) and restrict scope with limits/domains/filters.
+- Pick multi-agent pattern by task shape:
+  - Prompt Chaining for fixed sequential steps.
+  - Routing for variable input type/complexity.
+  - Parallelization for independent analyses.
+  - Orchestrator-Workers for dynamic planning/delegation.
+  - Evaluator-Optimizer for quality loops with exit criteria.
+
+## Reliability and Testing
+
+- Prefer `stream()` for progressive UX; use `queue()` for background processing.
+- Use middleware for prompt/response logging and policy enforcement.
+- In tests, fake SDK services and prevent stray calls (`preventStrayPrompts`, etc.).
+- Add assertions for prompted/queued calls and tool/file/store behavior for deterministic tests.

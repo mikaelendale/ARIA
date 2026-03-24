@@ -1,0 +1,262 @@
+
+<style>
+#aria-diagram { width: 100%; overflow-x: auto; }
+#aria-diagram svg { min-width: 900px; }
+</style>
+<div id="aria-diagram"></div>
+<script type="module">
+import mermaid from 'https://esm.sh/mermaid@11/dist/mermaid.esm.min.mjs';
+const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+await document.fonts.ready;
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'base',
+  fontFamily: '"Anthropic Sans", sans-serif',
+  themeVariables: {
+    darkMode: dark,
+    fontSize: '12px',
+    fontFamily: '"Anthropic Sans", sans-serif',
+    primaryColor: dark ? '#3C3489' : '#EEEDFE',
+    primaryTextColor: dark ? '#CECBF6' : '#26215C',
+    primaryBorderColor: dark ? '#7F77DD' : '#AFA9EC',
+    secondaryColor: dark ? '#085041' : '#E1F5EE',
+    secondaryTextColor: dark ? '#9FE1CB' : '#085041',
+    tertiaryColor: dark ? '#412402' : '#FAEEDA',
+    tertiaryTextColor: dark ? '#FAC775' : '#412402',
+    lineColor: dark ? '#888780' : '#5F5E5A',
+    edgeLabelBackground: dark ? '#2C2C2A' : '#F1EFE8',
+    clusterBkg: dark ? '#26215C' : '#EEEDFE',
+    clusterBorder: dark ? '#7F77DD' : '#AFA9EC',
+    nodeBorder: dark ? '#7F77DD' : '#AFA9EC',
+    titleColor: dark ? '#CECBF6' : '#26215C',
+  },
+  flowchart: { curve: 'basis', padding: 16, nodeSpacing: 40, rankSpacing: 50 }
+});
+
+const diagram = `flowchart TD
+    subgraph EXTERNAL["External World"]
+        EXT_CALL["Guest Phone Call"]
+        EXT_WA["Guest WhatsApp"]
+        EXT_TWEET["Twitter / Instagram"]
+        EXT_REVIEW["TripAdvisor / Google"]
+        EXT_WEATHER["Weather API"]
+        EXT_FLIGHT["Flight API"]
+    end
+
+    subgraph WEBHOOKS["Webhook Layer"]
+        WH_VOICE["POST /webhook/twilio/voice"]
+        WH_WA["POST /webhook/twilio/whatsapp"]
+    end
+
+    EXT_CALL --> WH_VOICE
+    EXT_WA --> WH_WA
+
+    subgraph SCHEDULER["Laravel Scheduler"]
+        SCH_SENT["RunSentinelJob — every 1 min"]
+        SCH_ECHO["RunEchoJob — every 30 mins"]
+        SCH_PULSE["RunPulseJob — every 1 hour"]
+    end
+
+    subgraph QUEUE["Redis Queue"]
+        Q_CORE["aria-core"]
+        Q_SENT["aria-sentinel"]
+        Q_VOICE["aria-voice"]
+    end
+
+    SCH_SENT --> Q_SENT
+    SCH_ECHO --> Q_CORE
+    SCH_PULSE --> Q_CORE
+    WH_VOICE --> Q_VOICE
+    WH_WA --> Q_CORE
+
+    subgraph SENTINEL["SENTINEL Agent"]
+        S1["Room service delay > 35 mins"]
+        S2["Housekeeping miss post checkout"]
+        S3["Occupancy crosses 80 or 90 percent"]
+        S4["Guest radio silence > 6hrs"]
+        S5["Guest birthday today"]
+        S6["No restaurant visit Day 2+"]
+        S7["Checkout tomorrow no return booking"]
+        S8["Flight delay > 30 mins"]
+        S9["Rain tomorrow detected"]
+    end
+
+    Q_SENT --> SENTINEL
+    EXT_WEATHER --> S9
+    EXT_FLIGHT --> S8
+
+    subgraph ECHO["ECHO Agent"]
+        E1["Scrape Google + TripAdvisor + Booking.com"]
+        E2["Monitor Twitter and Instagram mentions"]
+        E3["Sentiment + root cause clustering"]
+    end
+
+    EXT_REVIEW --> E1
+    EXT_TWEET --> E2
+    Q_CORE --> ECHO
+
+    subgraph PULSE["PULSE Agent"]
+        P1["Occupancy above 80 percent — raise prices"]
+        P2["Occupancy below 50 percent — send promo"]
+        P3["Guest checked in 2hrs no service — upsell"]
+        P4["Competitor price drop — value-add offer"]
+    end
+
+    Q_CORE --> PULSE
+
+    subgraph VERA["VERA Agent"]
+        V1["Churn score increases on silence and complaints"]
+        V2["Churn score decreases on bookings and engagement"]
+        V3["Score above 70 — fire churn risk event"]
+        V4["Tag preferences and flag VIPs"]
+    end
+
+    Q_CORE --> VERA
+
+    subgraph HERMES["HERMES Agent"]
+        H1["Open OpenAI Realtime WebSocket"]
+        H2["Stream audio Twilio to OpenAI and back"]
+        H3["Amharic and English mid-conversation"]
+        H4["Fire tools mid-call"]
+        H5["Save transcript to incidents table"]
+    end
+
+    Q_VOICE --> HERMES
+
+    subgraph EVENTS["Events to Orchestrator"]
+        EV1["room_service_delayed"]
+        EV2["housekeeping_missed"]
+        EV3["occupancy_threshold_crossed"]
+        EV4["guest_radio_silence"]
+        EV5["guest_birthday_today"]
+        EV6["no_restaurant_visit"]
+        EV7["flight_delay_detected"]
+        EV8["weather_alert"]
+        EV9["negative_review_posted"]
+        EV10["social_mention_detected"]
+        EV11["guest_churn_risk_high"]
+        EV12["whatsapp_inbound"]
+        EV13["voice_call_inbound"]
+        EV14["pricing_trigger"]
+        EV15["upsell_trigger"]
+    end
+
+    S1 --> EV1
+    S2 --> EV2
+    S3 --> EV3
+    S4 --> EV4
+    S5 --> EV5
+    S6 --> EV6
+    S8 --> EV7
+    S9 --> EV8
+    E3 --> EV9
+    E2 --> EV10
+    V3 --> EV11
+    WH_WA --> EV12
+    HERMES --> EV13
+    P1 --> EV14
+    P3 --> EV15
+
+    subgraph ORCHESTRATOR["ORCHESTRATOR — GPT-4o Brain"]
+        O1["buildContext — guest + history + occupancy"]
+        O2["getToolDefinitions — all 10 tools"]
+        O3["GPT-4o tool_choice auto"]
+        O4["Parse tool_calls from response"]
+        O5["dispatchTool — execute each call"]
+        O6["broadcast AriaActionFired via Reverb"]
+        O7["Update incident status"]
+    end
+
+    EVENTS --> O1
+    O1 --> O2
+    O2 --> O3
+    O3 --> O4
+    O4 --> O5
+    O5 --> O6
+    O5 --> O7
+
+    subgraph TOOLS["Tool Belt"]
+        T1["send_whatsapp()"]
+        T2["ping_kitchen()"]
+        T3["alert_manager()"]
+        T4["apply_discount()"]
+        T5["book_experience()"]
+        T6["adjust_pricing()"]
+        T7["draft_reply()"]
+        T8["log_incident()"]
+        T9["send_promo()"]
+        T10["escalate_to_human()"]
+    end
+
+    O5 --> T1
+    O5 --> T2
+    O5 --> T3
+    O5 --> T4
+    O5 --> T5
+    O5 --> T6
+    O5 --> T7
+    O5 --> T8
+    O5 --> T9
+    O5 --> T10
+
+    subgraph DATABASE["PostgreSQL"]
+        DB1["guests"]
+        DB2["bookings"]
+        DB3["incidents"]
+        DB4["agent_actions"]
+        DB5["rooms"]
+        DB6["staff"]
+    end
+
+    T1 --> DB4
+    T4 --> DB4
+    T5 --> DB2
+    T6 --> DB5
+    T8 --> DB3
+    VERA --> DB1
+    O7 --> DB3
+
+    subgraph REVERB["Laravel Reverb — WebSocket"]
+        RV1["Channel: aria-live"]
+        RV2["AriaActionFired"]
+        RV3["GuestChurnFlagged"]
+        RV4["PricingAdjusted"]
+        RV5["IncidentResolved"]
+    end
+
+    O6 --> RV1
+    RV1 --> RV2
+    RV1 --> RV3
+    RV1 --> RV4
+    RV1 --> RV5
+
+    subgraph DASHBOARD["React Dashboard — Inertia.js"]
+        FE1["ActionFeed — live ARIA action stream"]
+        FE2["AgentStatusBadge — green yellow red"]
+        FE3["LiveCounter — ETB revenue delta"]
+        FE4["ChurnScoreBar — 0 to 100"]
+        FE5["Incidents + Guest pages"]
+    end
+
+    RV2 --> FE1
+    RV3 --> FE4
+    RV4 --> FE3
+    RV5 --> FE5
+
+    subgraph USERS["User Types"]
+        U1["Guest — WhatsApp only"]
+        U2["Front Desk — dashboard"]
+        U3["Department Staff — WhatsApp alerts"]
+        U4["Manager — full access + overrides"]
+    end
+
+    T1 --> U1
+    T2 --> U3
+    T3 --> U4
+    FE1 --> U2
+    FE1 --> U4
+    U4 -->|"pause / override"| ORCHESTRATOR`;
+
+const { svg } = await mermaid.render('aria-svg', diagram);
+document.getElementById('aria-diagram').innerHTML = svg;
+</script>

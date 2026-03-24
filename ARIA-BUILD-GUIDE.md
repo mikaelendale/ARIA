@@ -207,20 +207,24 @@
 
 ---
 
-## PHASE 3 — Services Layer
+## PHASE 3 — Laravel AI SDK foundation & integration services
 
-### Step 21 — Create OpenAIService
-- Create a new file at `app/Services/OpenAIService.php`
-- This class has one main job: send a message with tools to GPT-4o and return the tool calls
-- Write a method called `runWithTools` that accepts a system prompt, a user message, and an array of tool definitions
-- Inside that method, call the OpenAI chat completions endpoint
-- Set the model to `gpt-4o`
-- Pass the system and user messages
-- Pass the tools array
-- Set tool_choice to auto
-- Parse the response and return the array of tool_calls from the first choice
-- Write a second method called `runSimple` that just sends a message and returns the text response — used for drafting replies and non-tool tasks
-- Test it manually by calling `runSimple` with a test message from a tinker session and confirming you get a response back
+ARIA’s “brain” is implemented with the **Laravel AI SDK** (`laravel/ai`), not a bespoke HTTP wrapper around OpenAI. Follow the project skill [`.cursor/skills/laravel-ai-sdk-guide/SKILL.md`](.cursor/skills/laravel-ai-sdk-guide/SKILL.md) and the in-repo docs [`laravel-AI-SDK.md`](laravel-AI-SDK.md) and [`laravel-AI-SDK-multiagent.md`](laravel-AI-SDK-multiagent.md) for agents, tools, structured output, streaming, queues, and tests.
+
+**Default build path (same order as the skill):** start with the `agent()` helper or a single generated agent class → move to dedicated agent classes when logic is reusable or testable → add `schema` when another part of the app must read named fields → add SDK **tools** only for side effects (Twilio, DB writes, pricing) with strict tool schemas → introduce orchestration patterns (prompt chaining, routing, parallelization, orchestrator–workers, evaluator–optimizer) only when complexity requires it.
+
+**Testing:** fake AI boundaries in tests (`Agent::fake`, `preventStrayRequests`, etc. per `laravel-AI-SDK.md` Testing). Do not rely on live API calls in CI.
+
+Phases 4–6 below assume **SDK agents and tools**; they replace the older idea of a hand-written `OpenAIService` that called the REST API directly.
+
+### Step 21 — Install and configure the Laravel AI SDK
+- Require the package: `composer require laravel/ai`
+- Publish config and provider: `php artisan vendor:publish --provider="Laravel\Ai\AiServiceProvider"`
+- Run migrations so the SDK can persist conversations: `php artisan migrate` (creates `agent_conversations` / `agent_conversation_messages` as documented in `laravel-AI-SDK.md`)
+- Copy provider keys into `.env` — at minimum `OPENAI_API_KEY` (see `config/ai.php` after publish). You can keep Phase 1 `OPENAI_*` variables aligned with the same keys so `openai-php/laravel` (if present) and `config/ai.php` stay in sync
+- Set default text model in `config/ai.php` to what ARIA uses for orchestration (e.g. a current OpenAI GPT-4 class model appropriate for tool calling)
+- Smoke test: from `php artisan tinker`, run a minimal prompt using the `agent()` helper **or** an agent class created with `php artisan make:agent` (see Agents section in `laravel-AI-SDK.md`) and confirm you get a text response
+- Optional: generate a stub orchestrator-facing agent with `php artisan make:agent AriaOrchestrator` — full wiring happens in Phase 5; this step only proves the SDK is live
 
 ### Step 22 — Create TwilioService
 - Create a new file at `app/Services/TwilioService.php`
@@ -247,45 +251,46 @@
 ## PHASE 4 — Tool Belt
 
 ### Step 25 — Create the Tools directory and base structure
-- Create a folder at `app/AI/Tools/`
-- Every tool is a simple PHP class with a single `execute` method that accepts an array of arguments
-- Each tool also has a static `definition` method that returns the OpenAI-compatible tool definition array — this is what gets passed to GPT-4o so it knows the tool exists
+- Create a folder for SDK tools (e.g. `app/Ai/Tools/` if you use `php artisan make:tool` / the same namespace as `make:agent`, or `app/Ai/Tools/` if you standardise the folder name — **stay consistent** with PSR-4 in `composer.json`)
+- Each tool is a **Laravel AI SDK** tool class implementing the SDK contract: it exposes a **`schema(JsonSchema $schema)`** for arguments and an **`__invoke`** (or equivalent) implementation that performs the side effect — see **Tools** in [`laravel-AI-SDK.md`](laravel-AI-SDK.md)
+- Register each tool on the orchestrator agent’s `tools()` method (or pass them into `agent()` when prototyping) instead of maintaining a parallel array of raw OpenAI JSON tool definitions
+- Side effects: persist to `agent_actions`, call `TwilioService`, update `rooms`, etc. Keep tool descriptions aligned with the product tool belt in [`ARIA.md`](ARIA.md)
 
 ### Step 26 — Build SendWhatsapp tool
-- Create `app/AI/Tools/SendWhatsapp.php`
-- The `definition` method returns: name as `send_whatsapp`, description as "Send a WhatsApp message to a guest", parameters with `guest_id` string and `message` string, both required
-- The `execute` method accepts guest_id and message
+- Create `app/Ai/Tools/SendWhatsapp.php` (or your chosen namespace)
+- Define the tool name and schema so the model sees `send_whatsapp` with parameters `guest_id` and `message` (both required) — match the SDK Tool pattern, not only a static OpenAI array
+- Implement the tool’s `__invoke` (or a thin `execute` called from it) with guest_id and message
 - It looks up the guest phone number from the database using guest_id
 - It calls TwilioService `sendWhatsapp` with that number and the message
 - It logs the action to agent_actions table
 - It returns a success or failure status
 
 ### Step 27 — Build PingKitchen tool
-- Create `app/AI/Tools/PingKitchen.php`
-- Definition: name `ping_kitchen`, description "Alert kitchen staff about a delayed or urgent order", parameters with `order_description` string and `room_number` string
+- Create `app/Ai/Tools/PingKitchen.php`
+- Schema: name `ping_kitchen`, description "Alert kitchen staff about a delayed or urgent order", parameters with `order_description` string and `room_number` string
 - Execute: find the kitchen staff member marked as available from the staff table
 - Send them a WhatsApp alert via TwilioService with the room number and issue
 - Log the action
 - Return status
 
 ### Step 28 — Build AlertManager tool
-- Create `app/AI/Tools/AlertManager.php`
-- Definition: name `alert_manager`, description "Escalate a critical issue to the hotel manager", parameters with `issue` string, `severity` string, and `guest_id` optional string
+- Create `app/Ai/Tools/AlertManager.php`
+- Schema: name `alert_manager`, description "Escalate a critical issue to the hotel manager", parameters with `issue` string, `severity` string, and `guest_id` optional string
 - Execute: find staff with department `management` from the staff table
 - Send WhatsApp alert with full issue description
 - Log the action
 - Return status
 
 ### Step 29 — Build ApplyDiscount tool
-- Create `app/AI/Tools/ApplyDiscount.php`
-- Definition: name `apply_discount`, description "Apply a discount or compensation to a guest", parameters with `guest_id` string, `amount` number, `reason` string
+- Create `app/Ai/Tools/ApplyDiscount.php`
+- Schema: name `apply_discount`, description "Apply a discount or compensation to a guest", parameters with `guest_id` string, `amount` number, `reason` string
 - Execute: find the guest, create a discount record in the incidents table as context, send the guest a WhatsApp message informing them of the discount
 - Log the action with revenue_impact set to negative of the discount amount
 - Return status
 
 ### Step 30 — Build BookExperience tool
-- Create `app/AI/Tools/BookExperience.php`
-- Definition: name `book_experience`, description "Book an experience for a guest", parameters with `guest_id` string and `experience_name` string
+- Create `app/Ai/Tools/BookExperience.php`
+- Schema: name `book_experience`, description "Book an experience for a guest", parameters with `guest_id` string and `experience_name` string
 - Execute: find the experience by name from the experiences table
 - Create a booking record
 - Send the guest a WhatsApp confirmation
@@ -293,39 +298,39 @@
 - Return status
 
 ### Step 31 — Build AdjustPricing tool
-- Create `app/AI/Tools/AdjustPricing.php`
-- Definition: name `adjust_pricing`, description "Adjust room prices based on occupancy or demand", parameters with `room_type` string, `new_price` number, `reason` string
+- Create `app/Ai/Tools/AdjustPricing.php`
+- Schema: name `adjust_pricing`, description "Adjust room prices based on occupancy or demand", parameters with `room_type` string, `new_price` number, `reason` string
 - Execute: update current_price on all rooms of that type in the rooms table
 - Calculate revenue delta vs base price
 - Log the action with revenue_impact set to the delta
 - Return status and the calculated impact
 
 ### Step 32 — Build DraftReply tool
-- Create `app/AI/Tools/DraftReply.php`
-- Definition: name `draft_reply`, description "Draft a management response to a guest review", parameters with `review_text` string and `rating` number
-- Execute: call OpenAIService `runSimple` with a prompt asking GPT-4o to write a professional management response to the review
+- Create `app/Ai/Tools/DraftReply.php`
+- Schema: name `draft_reply`, description "Draft a management response to a guest review", parameters with `review_text` string and `rating` number
+- Execute: prompt a small **Laravel AI SDK** agent (or `agent()` one-off) with instructions for a professional management reply — no separate `OpenAIService`; use the same provider/model defaults as in `config/ai.php`
 - Store the draft in the incidents table as context
 - Log the action
 - Return the drafted reply text
 
 ### Step 33 — Build LogIncident tool
-- Create `app/AI/Tools/LogIncident.php`
-- Definition: name `log_incident`, description "Log an issue or event to the incident record", parameters with `type` string, `description` string, `severity` string, and `guest_id` optional string
+- Create `app/Ai/Tools/LogIncident.php`
+- Schema: name `log_incident`, description "Log an issue or event to the incident record", parameters with `type` string, `description` string, `severity` string, and `guest_id` optional string
 - Execute: create a new incident record in the database with status open
 - Log the action
 - Return the new incident id
 
 ### Step 34 — Build SendPromo tool
-- Create `app/AI/Tools/SendPromo.php`
-- Definition: name `send_promo`, description "Send a promotional offer to past or current guests", parameters with `message` string and `target` string — target values: all_current, past_guests, vip_only
+- Create `app/Ai/Tools/SendPromo.php`
+- Schema: name `send_promo`, description "Send a promotional offer to past or current guests", parameters with `message` string and `target` string — target values: all_current, past_guests, vip_only
 - Execute: query guests based on target — current guests by checked_in_at, past guests by checked_out_at, vips by is_vip flag
 - Loop through and send each guest a WhatsApp message via TwilioService
 - Log each send as a separate agent action
 - Return how many messages were sent
 
 ### Step 35 — Build EscalateToHuman tool
-- Create `app/AI/Tools/EscalateToHuman.php`
-- Definition: name `escalate_to_human`, description "Hand off a situation to a human staff member", parameters with `reason` string, `incident_id` optional string, and `guest_id` optional string
+- Create `app/Ai/Tools/EscalateToHuman.php`
+- Schema: name `escalate_to_human`, description "Hand off a situation to a human staff member", parameters with `reason` string, `incident_id` optional string, and `guest_id` optional string
 - Execute: find the most available reception staff member
 - Send them a WhatsApp with full context
 - Update the incident status to `escalated` if incident_id provided
@@ -336,39 +341,33 @@
 
 ## PHASE 5 — Orchestrator
 
-### Step 36 — Create the Orchestrator class
-- Create `app/AI/Orchestrator.php`
-- This class is the master brain — everything flows through it
-- Write a method called `handle` that accepts an event array with type and payload
-- This method will be called from every queued job
+### Step 36 — Create the Orchestrator (SDK agent or service)
+- Prefer an **orchestrator agent class** under `app/Ai/Agents/` (e.g. `AriaOrchestrator`) implementing `Laravel\Ai\Contracts\Agent` and `HasTools`, **or** a thin `app/Ai/Orchestrator.php` service that wraps `(new AriaOrchestrator)->prompt(...)` / `agent(...)` — see [`laravel-AI-SDK.md`](laravel-AI-SDK.md) Agents
+- This is the master brain — everything flows through it
+- Expose a method called `handle` that accepts an event array with type and payload (your queued jobs call this)
+- Register all ARIA tool classes on this agent’s `tools()` method
 
 ### Step 37 — Build context assembly in Orchestrator
 - Inside `handle`, write a private method called `buildContext`
-- This method takes the event and builds a rich context string for GPT-4o
+- This method takes the event and builds a rich user message (or system augmentation) for the orchestrator model
 - If the event has a guest_id, load the guest with their last 5 incidents and last 10 agent actions
 - Include current room status, churn score, VIP flag, and preferences
 - Include the current time, day of week, and occupancy percentage
-- Return all of this as a formatted string that gives GPT-4o full situational awareness
+- Return a formatted string (or structured prelude) so the model has full situational awareness
 
-### Step 38 — Build tool definitions loader in Orchestrator
-- Write a private method called `getToolDefinitions`
-- This method returns an array of all 10 tool definitions by calling the static `definition` method on each tool class
-- This array gets passed to OpenAI on every call
+### Step 38 — Tools registration (no parallel JSON definitions)
+- The orchestrator agent’s `tools()` method returns instances of your 10 tool classes — the **Laravel AI SDK** turns them into provider tool definitions; you do **not** maintain a duplicate `getToolDefinitions()` array unless you are prototyping
+- Optionally use `#[Model]`, `#[MaxSteps]`, or middleware on the agent for timeouts and observability (see Agent Configuration in `laravel-AI-SDK.md`)
 
-### Step 39 — Build tool dispatcher in Orchestrator
-- Write a private method called `dispatchTool` that accepts a tool name and arguments array
-- Use a match statement to map tool names to their classes
-- Instantiate the correct tool class and call its `execute` method with the arguments
-- Return the result
-- If the tool name is not recognized, log an error and return a failure status
+### Step 39 — Tool execution
+- The SDK invokes tools when the model requests them; implement each tool’s `__invoke` to run side effects (DB, Twilio, etc.)
+- If you need a manual path (e.g. replay), keep a private `dispatchTool` that maps tool name → tool class and invokes it — but prefer the SDK’s built-in tool loop
+- If a tool name is not registered, log and fail safely
 
 ### Step 40 — Wire the full Orchestrator handle method
-- Back in `handle`, call `buildContext` to get the context string
-- Call `getToolDefinitions` to get the tools array
-- Pass both to OpenAIService `runWithTools`
-- Loop through every tool_call in the response
-- For each one, call `dispatchTool` with the name and parsed arguments
-- After all tools execute, broadcast an `AriaActionFired` event via Laravel broadcasting
+- In `handle`, call `buildContext` and pass it to the orchestrator agent via `->prompt(...)` (and use `->stream()` or `->queue()` if you need streaming or background processing — see SDK docs)
+- Let the SDK run the tool round-trip until the model finishes or `MaxSteps` is reached
+- After tools run, broadcast an `AriaActionFired` event via Laravel broadcasting
 - Update the incident status to `resolved` if applicable
 - Return a summary of what was done
 
@@ -377,12 +376,11 @@
 ## PHASE 6 — Sub-Agents
 
 ### Step 41 — Create the Agents directory
-- Create a folder at `app/AI/Agents/`
-- Every agent class has a single `run` method
-- Every agent's `run` method ultimately calls `Orchestrator->handle()` with a structured event
+- Create a folder at `app/Ai/Agents/` (or generate agents with `php artisan make:agent`)
+- Sub-agents can be SDK `Agent` classes with focused `instructions()` and optional `schema()` / tools, **or** thin services whose `run()` delegates to `Orchestrator->handle()` with a structured event
 
 ### Step 42 — Build SentinelAgent
-- Create `app/AI/Agents/SentinelAgent.php`
+- Create `app/Ai/Agents/SentinelAgent.php`
 - Write the `run` method
 - Inside, check for room service delays — query orders older than 35 mins with status not delivered, for each one call Orchestrator with type `room_service_delayed`
 - Check for housekeeping misses — query rooms with status `cleaning` where updated_at is older than 30 mins past checkout time
@@ -393,23 +391,22 @@
 - For every condition found, build a structured event and call Orchestrator
 
 ### Step 43 — Build NexusAgent
-- Create `app/AI/Agents/NexusAgent.php`
+- Create `app/Ai/Agents/NexusAgent.php`
 - Write the `run` method that accepts an event
-- Write a system prompt that tells GPT-4o it is NEXUS, the operations agent
+- Use SDK `instructions()` / agent prompt text that defines NEXUS as the operations agent
 - Call Orchestrator `handle` with the event and Nexus-specific context
 - NEXUS focuses on: routing to correct staff, tracking SLAs, communicating with guests about operational issues
 
 ### Step 44 — Build PulseAgent
-- Create `app/AI/Agents/PulseAgent.php`
+- Create `app/Ai/Agents/PulseAgent.php`
 - Write the `run` method
 - Check current occupancy percentage
 - Check if it is a weekend
-- Call OpenAIService with the current pricing data, occupancy, and a prompt asking it to decide whether to raise prices, lower them, trigger an upsell, or send a promo
-- Pass the appropriate tools: adjust_pricing, trigger_upsell, send_promo
-- Execute the returned tool calls
+- Use a **Laravel AI SDK** agent with tools `adjust_pricing`, `send_promo` (and any upsell tool you define) — pass pricing and occupancy in the prompt so the model decides whether to raise prices, lower them, or send a promo
+- Let the SDK execute tool calls (or call `Orchestrator->handle()` which already wraps the tool-enabled agent)
 
 ### Step 45 — Build VeraAgent
-- Create `app/AI/Agents/VeraAgent.php`
+- Create `app/Ai/Agents/VeraAgent.php`
 - Write a method called `updateScore` that accepts a guest and recalculates their churn score
 - The score increases when: guest has an unresolved complaint, guest hasn't interacted in 4+ hours, guest ignored a WhatsApp message, guest has no service usage on Day 2+
 - The score decreases when: guest books an experience, guest responds to a message, guest orders room service, guest visits the restaurant
@@ -417,15 +414,15 @@
 - If score crosses 70, call Orchestrator with type `guest_churn_risk_high`
 
 ### Step 46 — Build EchoAgent
-- Create `app/AI/Agents/EchoAgent.php`
+- Create `app/Ai/Agents/EchoAgent.php`
 - Write the `run` method
 - Call ReviewScraperService to get all recent reviews
 - For each new review not already in the database, store it as an incident with type `reputation`
 - If rating is 3 or below, call Orchestrator with type `negative_review_posted` including the review text
-- Orchestrator will use GPT-4o to draft a reply and send a recovery WhatsApp
+- Orchestrator will use the SDK orchestrator agent to draft a reply and send a recovery WhatsApp
 
 ### Step 47 — Build HermesAgent
-- Create `app/AI/Agents/HermesAgent.php`
+- Create `app/Ai/Agents/HermesAgent.php`
 - This agent is different — it is invoked by the Twilio webhook, not the scheduler
 - Write a method called `handleIncomingCall` that accepts the Twilio webhook payload
 - Write a method called `openRealtimeSession` that opens a WebSocket connection to the OpenAI Realtime API
@@ -596,7 +593,7 @@
 
 ### Step 70 — Script and test Scenario 2: Angry tweet
 - Trigger the demo endpoint with scenario `angry_tweet`
-- Confirm ECHO picks it up, calls GPT-4o, drafts a reply, and sends a recovery WhatsApp
+- Confirm ECHO picks it up, the orchestrator agent drafts a reply, and sends a recovery WhatsApp
 - Confirm it appears in the action feed
 
 ### Step 71 — Script and test Scenario 3: Occupancy spike and pricing
