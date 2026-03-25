@@ -35,4 +35,22 @@ return [
         ],
     ],
 
+    'twilio' => [
+        'sid' => env('TWILIO_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'sms_from' => env('TWILIO_PHONE_NUMBER'),
+        'whatsapp_from' => env('TWILIO_WHATSAPP_FROM'),
+    ],
+
+    'openweather' => [
+        'key' => env('OPENWEATHER_KEY'),
+        'lat' => env('OPENWEATHER_LAT', '11.6'),
+        'lon' => env('OPENWEATHER_LON', '37.3833'),
+    ],
+
+    'google_places' => [
+        'key' => env('GOOGLE_PLACES_KEY'),
+        'place_id' => env('GOOGLE_PLACES_PLACE_ID'),
+    ],
+
 ];

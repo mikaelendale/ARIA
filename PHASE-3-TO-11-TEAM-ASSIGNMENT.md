@@ -1,13 +1,15 @@
 # ARIA Team Assignment (Phase 3 to Phase 11)
 
 ## Team
+
 - `@mike`
 - `@fuad`
-- `@nahom`
+- `@nahoml`
 
 ## Ownership Split
 
 ### `@mike` — AI Core and Agent Intelligence
+
 - **Phase 3:** Laravel AI SDK foundation and integration services
 - **Phase 5:** Orchestrator
 - **Phase 6:** Sub-Agents
@@ -17,6 +19,7 @@
 ---
 
 ### `@fuad` — Tooling, Background Execution, Real-Time Events
+
 - **Phase 4:** Tool Belt
 - **Phase 7:** Jobs
 - **Phase 8:** Events and Broadcasting
@@ -26,6 +29,7 @@
 ---
 
 ### `@nahom` — Integrations, Product Surface, Demo Delivery
+
 - **Phase 9:** Webhooks and Controllers
 - **Phase 10:** Frontend Dashboard
 - **Phase 11:** Demo Preparation
@@ -43,11 +47,13 @@
 - `@nahom` takes **Phase 9** when orchestrator/jobs/events are stable, then completes **Phase 10** and **Phase 11**.
 
 ## Support Pairing (Secondary Reviewer)
+
 - `@mike` reviews AI-related logic in Phases 4, 9
 - `@fuad` reviews queue/event reliability in Phases 5, 6, 10
 - `@nahom` reviews UX/demo flow in Phases 8, 10, 11
 
 ## Quick Weekly Structure (Optional)
+
 - **Day 1-2:** Phase 3 + early Phase 4
 - **Day 3-4:** Phases 5-6 + 7
 - **Day 5:** Phases 8-9 integration

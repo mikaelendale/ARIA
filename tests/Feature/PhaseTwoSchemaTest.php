@@ -20,6 +20,8 @@ class PhaseTwoSchemaTest extends TestCase
             'agent_actions',
             'staff',
             'experiences',
+            'agent_conversations',
+            'agent_conversation_messages',
         ] as $table) {
             $this->assertTrue(
                 Schema::hasTable($table),
