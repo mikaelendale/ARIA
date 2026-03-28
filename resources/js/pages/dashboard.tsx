@@ -1,5 +1,16 @@
 import { Head } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { useEffect } from 'react';
+import { useActionFeedStore } from '@/app/store/useActionFeedStore';
+import { useAgentStore } from '@/app/store/useAgentStore';
+import { useRevenueStore } from '@/app/store/useRevenueStore';
+import { ActionFeed } from '@/components/dashboard/action-feed';
+import { AgentStatusCard } from '@/components/dashboard/agent-status-card';
+import { ChurnBoard } from '@/components/dashboard/churn-board';
+import { LiveRevenueCard } from '@/components/dashboard/live-revenue-card';
+import { TopStatsBar } from '@/components/dashboard/top-stats-bar';
+import { useAgentStatus } from '@/hooks/useAgentStatus';
+import { useDashboardEvents } from '@/hooks/useDashboardEvents';
+import { useDashboardStats } from '@/hooks/useOpsQueries';
 import AppLayout from '@/layouts/app-layout';
 import { dashboard } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
@@ -12,23 +23,49 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard() {
+    useDashboardEvents();
+    useAgentStatus();
+
+    const statsQuery = useDashboardStats();
+    const setInitialActions = useActionFeedStore((state) => state.setInitialActions);
+    const setTotalRevenue = useRevenueStore((state) => state.setTotalRevenue);
+    const computeStatus = useAgentStore((state) => state.computeStatus);
+
+    useEffect(() => {
+        if (!statsQuery.data) {
+return;
+}
+
+        setInitialActions(statsQuery.data.initialActions);
+        setTotalRevenue(statsQuery.data.initialRevenueImpact);
+    }, [statsQuery.data, setInitialActions, setTotalRevenue]);
+
+    useEffect(() => {
+        computeStatus();
+        const interval = window.setInterval(computeStatus, 30_000);
+
+        return () => window.clearInterval(interval);
+    }, [computeStatus]);
+
+    const churnScore = statsQuery.data?.churnScore ?? 0;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto p-4">
+                <TopStatsBar
+                    guests={statsQuery.data?.guests ?? 0}
+                    incidentsOpen={statsQuery.data?.incidentsOpen ?? 0}
+                    resolvedToday={statsQuery.data?.resolvedToday ?? 0}
+                    revenue={statsQuery.data?.initialRevenueImpact ?? 0}
+                />
+                <div className="grid min-h-[640px] grid-cols-1 gap-4 xl:grid-cols-[2fr_1fr]">
+                    <ActionFeed />
+                    <div className="space-y-4">
+                        <LiveRevenueCard />
+                        <AgentStatusCard />
+                        <ChurnBoard score={churnScore} />
                     </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
                 </div>
             </div>
         </AppLayout>
