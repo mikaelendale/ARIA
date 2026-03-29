@@ -1,7 +1,9 @@
 import { createInertiaApp } from '@inertiajs/react';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { queryClient } from '@/app/queryClient';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import './echo';
 import '../css/app.css';
@@ -21,9 +23,11 @@ createInertiaApp({
 
         root.render(
             <StrictMode>
-                <TooltipProvider delayDuration={0}>
-                    <App {...props} />
-                </TooltipProvider>
+                <QueryClientProvider client={queryClient}>
+                    <TooltipProvider delayDuration={0}>
+                        <App {...props} />
+                    </TooltipProvider>
+                </QueryClientProvider>
             </StrictMode>,
         );
     },
