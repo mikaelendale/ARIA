@@ -18,9 +18,10 @@ class RoomSeeder extends Seeder
         ];
         $statuses = ['available', 'occupied', 'cleaning', 'maintenance'];
 
+        // Kuriftu-style codes: KV = resort villa block; types map to standard / deluxe / suite / villa inventory.
         for ($i = 1; $i <= 80; $i++) {
             $type = $types[($i - 1) % 4];
-            $number = sprintf('R-%03d', $i);
+            $number = sprintf('KV-%03d', $i);
             $base = $baseByType[$type];
             $delta = (($i % 7) - 3) * 150;
             $current = max(1000, $base + $delta);

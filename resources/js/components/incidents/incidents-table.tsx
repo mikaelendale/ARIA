@@ -4,16 +4,42 @@ import {
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
-    useReactTable
-    
-    
+    useReactTable,
 } from '@tanstack/react-table';
-import type {ColumnDef, SortingState} from '@tanstack/react-table';
+import type { ColumnDef, SortingState } from '@tanstack/react-table';
+import { Link } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { formatRelativeTime, formatTimeAgo } from '@/lib/formatters';
+import { cn } from '@/lib/utils';
 import type { Incident } from '@/types/ops';
+import { show as incidentShow } from '@/routes/incidents';
+
+function severityBadgeVariant(severity: Incident['severity']): 'default' | 'secondary' | 'destructive' | 'outline' {
+    if (severity === 'critical' || severity === 'high') {
+        return 'destructive';
+    }
+
+    if (severity === 'medium') {
+        return 'default';
+    }
+
+    return 'secondary';
+}
+
+function statusBadgeVariant(status: Incident['status']): 'default' | 'secondary' | 'outline' {
+    if (status === 'open') {
+        return 'default';
+    }
+
+    if (status === 'triaged') {
+        return 'secondary';
+    }
+
+    return 'outline';
+}
 
 export function IncidentsTable({ data }: { data: Incident[] }) {
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -21,20 +47,49 @@ export function IncidentsTable({ data }: { data: Incident[] }) {
 
     const columns = useMemo<ColumnDef<Incident>[]>(
         () => [
-            { accessorKey: 'type', header: 'Type' },
+            {
+                accessorKey: 'type',
+                header: 'Type',
+                cell: ({ row }) => (
+                    <Link
+                        href={incidentShow.url(row.original.id)}
+                        className="text-primary font-medium hover:underline"
+                    >
+                        {row.original.type}
+                    </Link>
+                ),
+            },
             {
                 accessorKey: 'severity',
                 header: 'Severity',
-                cell: ({ row }) => {
-                    const severity = row.original.severity;
-                    const variant = severity === 'critical' || severity === 'high' ? 'default' : 'secondary';
-
-                    return <Badge variant={variant}>{severity}</Badge>;
-                },
+                cell: ({ row }) => (
+                    <Badge
+                        variant={severityBadgeVariant(row.original.severity)}
+                        className="rounded-md text-[10px] uppercase tracking-wide"
+                    >
+                        {row.original.severity}
+                    </Badge>
+                ),
             },
-            { accessorKey: 'status', header: 'Status' },
-            { accessorKey: 'resolutionTime', header: 'Resolution Time' },
-            { accessorKey: 'createdAt', header: 'Created At' },
+            {
+                accessorKey: 'status',
+                header: 'Status',
+                cell: ({ row }) => (
+                    <Badge variant={statusBadgeVariant(row.original.status)} className="rounded-md capitalize">
+                        {row.original.status}
+                    </Badge>
+                ),
+            },
+            { accessorKey: 'resolutionTime', header: 'Resolution' },
+            {
+                accessorKey: 'createdAt',
+                header: 'Opened',
+                cell: ({ row }) => (
+                    <span className="text-muted-foreground text-xs tabular-nums" title={formatRelativeTime(row.original.createdAt)}>
+                        {formatTimeAgo(row.original.createdAt)}
+                    </span>
+                ),
+            },
         ],
         [],
     );
@@ -80,7 +135,7 @@ export function IncidentsTable({ data }: { data: Incident[] }) {
                     </TableHeader>
                     <TableBody>
                         {table.getRowModel().rows.map((row) => (
-                            <TableRow key={row.id}>
+                            <TableRow key={row.id} className={cn('transition-colors hover:bg-muted/50')}>
                                 {row.getVisibleCells().map((cell) => (
                                     <TableCell key={cell.id}>
                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}

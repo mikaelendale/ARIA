@@ -14,7 +14,7 @@ Short reference for what changed in the repo relative to the build guide and pro
 
 ## Phase 2 — Domain data
 
-- **Tables:** `guests`, `rooms`, `bookings`, `incidents`, `agent_actions`, `staff`, `experiences` (UUID PKs except `rooms.number` string PK).
+- **Tables:** `guests`, `rooms`, `bookings`, `experience_bookings`, `incidents`, `agent_actions`, `staff`, `experiences` (UUID PKs except `rooms.number` string PK).
 - **Models:** `Guest`, `Booking`, `Incident`, `AgentAction`, `Room`, `Staff`, `Experience` with fillable casts and relationships; `Booking` → `Room` via `room_number`.
 - **Seeders:** `RoomSeeder` (80 rooms), `GuestSeeder` (20 guests), `StaffSeeder`, `ExperienceSeeder` (Kuriftu list); wired in `DatabaseSeeder`.
 - **Tests:** `tests/Feature/PhaseTwoSchemaTest.php` asserts domain tables exist after migrations (includes Laravel AI `agent_conversations` / `agent_conversation_messages` when those migrations are present).
@@ -29,7 +29,10 @@ Short reference for what changed in the repo relative to the build guide and pro
 ## Build guide — AI architecture (Laravel AI SDK)
 
 - **Phase 3** of [`ARIA-BUILD-GUIDE.md`](../ARIA-BUILD-GUIDE.md) was rewritten from a bespoke `OpenAIService` to **Laravel AI SDK** (`laravel/ai`): install, publish config, migrate conversation tables, smoke test with `agent()` / `make:agent`.
-- **Phases 4–6** in the guide were aligned: tools as SDK tools with `schema` + `__invoke`, orchestrator as an SDK agent (or thin wrapper) with `tools()` / `prompt()`, sub-agents under `app/Ai/Agents/` where applicable.
+- **Phases 4–6** in the guide were aligned: tools as SDK tools with `schema` + `handle(Request $request)`, orchestrator as an SDK agent (or thin wrapper) with `tools()` / `prompt()`, sub-agents under `app/Ai/Agents/` where applicable.
+- **Phase 4 — Tool belt:** ten tools under `app/Ai/Tools`, `RecordsAgentActions`, `experience_bookings` + `ExperienceBooking`, `AriaOrchestrator`, tests in `tests/Feature/PhaseFourToolBeltTest.php` — see [`docs/PHASE4-TOOL-BELT.md`](PHASE4-TOOL-BELT.md).
+- **Phase 5 — Orchestrator:** `App\Ai\Orchestrator` (`handle` + `buildContext`), `App\Ai\AriaToolRegistry`, `App\Events\AriaActionFired` (private channel `aria`), `#[MaxSteps(15)]` on `AriaOrchestrator`; tests in `tests/Feature/PhaseFiveOrchestratorTest.php` — see [`docs/PHASE5-ORCHESTRATOR.md`](PHASE5-ORCHESTRATOR.md).
+- **Phase 6 — Sub-agents:** `SentinelAgent`, `NexusAgent`, `PulseAgent` + `PulsePricingAgent`, `VeraAgent`, `EchoAgent`, `HermesAgent` (voice stub); Phase 6 schema migration for room service, restaurant visits, review fingerprints, DOB; tests `tests/Feature/PhaseSixSubAgentsTest.php` — see [`docs/PHASE6-SUB-AGENTS.md`](PHASE6-SUB-AGENTS.md).
 - **Conventions:** See [`.cursor/skills/laravel-ai-sdk-guide/SKILL.md`](../.cursor/skills/laravel-ai-sdk-guide/SKILL.md), [`laravel-AI-SDK.md`](../laravel-AI-SDK.md), and [`laravel-AI-SDK-multiagent.md`](../laravel-AI-SDK-multiagent.md).
 
 ## Known follow-ups

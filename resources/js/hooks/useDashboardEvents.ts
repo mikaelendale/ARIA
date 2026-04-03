@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
 import { useActionFeedStore } from '@/app/store/useActionFeedStore';
 import { useAgentStore } from '@/app/store/useAgentStore';
-import { useRevenueStore } from '@/app/store/useRevenueStore';
+import { usePulseRevenueStore } from '@/app/store/usePulseRevenueStore';
 import { useEcho } from '@/hooks/useEcho';
-import type { ActionFeedItem, AgentName } from '@/types/ops';
+import type { ActionFeedItem } from '@/types/ops';
 
 interface ActionPayload {
     id?: string;
-    agent: AgentName;
+    agent: string;
     tool: string;
     message: string;
     timestamp: string;
@@ -29,12 +29,12 @@ export function useDashboardEvents() {
     const echo = useEcho();
     const addAction = useActionFeedStore((state) => state.addAction);
     const updateAgentLastRun = useAgentStore((state) => state.updateAgentLastRun);
-    const increment = useRevenueStore((state) => state.increment);
+    const incrementPulse = usePulseRevenueStore((state) => state.incrementPulse);
 
     useEffect(() => {
         if (!echo) {
-return;
-}
+            return;
+        }
 
         const channel = echo.channel('aria-live');
 
@@ -46,8 +46,8 @@ return;
 
         channel.listen(
             'PricingAdjusted',
-            (event: { amount: number; timestamp: string; agent?: AgentName }) => {
-                increment(event.amount);
+            (event: { amount: number; timestamp: string; agent?: string }) => {
+                incrementPulse(event.amount);
 
                 if (event.agent) {
                     updateAgentLastRun(event.agent, event.timestamp);
@@ -57,7 +57,7 @@ return;
 
         channel.listen(
             'GuestChurnFlagged',
-            (event: { agent: AgentName; timestamp: string; message?: string }) => {
+            (event: { agent: string; timestamp: string; message?: string }) => {
                 updateAgentLastRun(event.agent, event.timestamp);
                 addAction({
                     id: `churn-${event.agent}-${event.timestamp}`,
@@ -72,7 +72,7 @@ return;
 
         channel.listen(
             'IncidentResolved',
-            (event: { agent: AgentName; timestamp: string; message?: string }) => {
+            (event: { agent: string; timestamp: string; message?: string }) => {
                 updateAgentLastRun(event.agent, event.timestamp);
                 addAction({
                     id: `incident-${event.agent}-${event.timestamp}`,
@@ -88,5 +88,5 @@ return;
         return () => {
             echo.leave('aria-live');
         };
-    }, [echo, addAction, updateAgentLastRun, increment]);
+    }, [echo, addAction, updateAgentLastRun, incrementPulse]);
 }

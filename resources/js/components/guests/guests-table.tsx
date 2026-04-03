@@ -4,17 +4,19 @@ import {
     getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
-    useReactTable
-    
-    
+    useReactTable,
 } from '@tanstack/react-table';
-import type {ColumnDef, SortingState} from '@tanstack/react-table';
+import type { ColumnDef, SortingState } from '@tanstack/react-table';
+import { Link } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
+import { ChurnScoreBar } from '@/components/dashboard/churn-score-bar';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { formatRelativeTime, formatTimeAgo } from '@/lib/formatters';
+import { cn } from '@/lib/utils';
 import type { Guest } from '@/types/ops';
+import { show as guestShow } from '@/routes/guests';
 
 export function GuestsTable({ data }: { data: Guest[] }) {
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -22,21 +24,23 @@ export function GuestsTable({ data }: { data: Guest[] }) {
 
     const columns = useMemo<ColumnDef<Guest>[]>(
         () => [
-            { accessorKey: 'name', header: 'Name' },
+            {
+                accessorKey: 'name',
+                header: 'Name',
+                cell: ({ row }) => (
+                    <Link
+                        href={guestShow.url(row.original.id)}
+                        className="text-primary font-medium hover:underline"
+                    >
+                        {row.original.name}
+                    </Link>
+                ),
+            },
             { accessorKey: 'room', header: 'Room' },
             {
                 accessorKey: 'churnScore',
-                header: 'Churn Score',
-                cell: ({ row }) => {
-                    const score = row.original.churnScore;
-                    const color = score <= 40 ? 'bg-green-500' : score <= 70 ? 'bg-amber-500' : 'bg-red-500';
-
-                    return (
-                        <div className="w-40">
-                            <Progress value={score} indicatorClassName={color} />
-                        </div>
-                    );
-                },
+                header: 'Churn',
+                cell: ({ row }) => <ChurnScoreBar score={row.original.churnScore} className="max-w-[200px]" />,
             },
             {
                 accessorKey: 'vip',
@@ -47,7 +51,15 @@ export function GuestsTable({ data }: { data: Guest[] }) {
                     </Badge>
                 ),
             },
-            { accessorKey: 'lastInteraction', header: 'Last Interaction' },
+            {
+                accessorKey: 'lastInteraction',
+                header: 'Last interaction',
+                cell: ({ row }) => (
+                    <span className="text-muted-foreground text-xs tabular-nums" title={formatRelativeTime(row.original.lastInteraction)}>
+                        {formatTimeAgo(row.original.lastInteraction)}
+                    </span>
+                ),
+            },
         ],
         [],
     );
@@ -94,7 +106,13 @@ export function GuestsTable({ data }: { data: Guest[] }) {
                     </TableHeader>
                     <TableBody>
                         {table.getRowModel().rows.map((row) => (
-                            <TableRow key={row.id}>
+                            <TableRow
+                                key={row.id}
+                                className={cn(
+                                    'transition-colors',
+                                    'hover:bg-muted/50 data-[state=selected]:bg-muted/50',
+                                )}
+                            >
                                 {row.getVisibleCells().map((cell) => (
                                     <TableCell key={cell.id}>
                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}

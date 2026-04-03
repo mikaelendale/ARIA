@@ -5,23 +5,37 @@ interface TopStatsBarProps {
     guests: number;
     incidentsOpen: number;
     resolvedToday: number;
+    occupancyPercent: number;
     revenue: number;
 }
 
-export function TopStatsBar({ guests, incidentsOpen, resolvedToday, revenue }: TopStatsBarProps) {
+export function TopStatsBar({
+    guests,
+    incidentsOpen,
+    resolvedToday,
+    occupancyPercent,
+    revenue,
+}: TopStatsBarProps) {
     const items = [
-        { label: 'Active Guests', value: formatCompactNumber(guests) },
-        { label: 'Open Incidents', value: formatCompactNumber(incidentsOpen) },
-        { label: 'Resolved Today', value: formatCompactNumber(resolvedToday) },
-        { label: 'Revenue Impact', value: formatCurrencyETB(revenue) },
+        { label: 'Active guests', value: formatCompactNumber(guests) },
+        { label: 'Open incidents', value: formatCompactNumber(incidentsOpen) },
+        { label: 'Resolved today', value: formatCompactNumber(resolvedToday) },
+        { label: 'Occupancy', value: `${occupancyPercent}%` },
+        { label: 'Revenue impact (today)', value: formatCurrencyETB(revenue) },
     ];
 
     return (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {items.map((item) => (
-                <Card key={item.label} className="bg-background border-muted rounded-xl p-4 shadow-sm">
-                    <div className="text-muted-foreground text-xs uppercase tracking-wide">{item.label}</div>
-                    <div className="mt-1 text-xl font-semibold">{item.value}</div>
+        <div className="grid grid-cols-2 gap-2 lg:grid-cols-3 xl:grid-cols-5">
+            {items.map((item, i) => (
+                <Card
+                    key={item.label}
+                    className="aria-animate-in border-border/40 bg-muted/10 rounded-md border px-3 py-2.5 shadow-none"
+                    style={{ animationDelay: `${i * 55}ms` }}
+                >
+                    <div className="text-muted-foreground text-xs font-semibold uppercase tracking-[0.18em]">
+                        {item.label}
+                    </div>
+                    <div className="mt-0.5 text-xl font-semibold tabular-nums tracking-tight">{item.value}</div>
                 </Card>
             ))}
         </div>

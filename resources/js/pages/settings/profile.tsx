@@ -4,9 +4,11 @@ import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileCo
 import DeleteUser from '@/components/delete-user';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { roleLabel } from '@/lib/aria-roles';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { edit } from '@/routes/profile';
@@ -69,6 +71,18 @@ export default function Profile({
                                         className="mt-2"
                                         message={errors.name}
                                     />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label>Role</Label>
+                                    <div className="flex items-center gap-2">
+                                        <Badge variant="secondary" className="rounded-lg font-normal">
+                                            {roleLabel(auth.user.role as string | undefined)}
+                                        </Badge>
+                                        <span className="text-muted-foreground text-xs">
+                                            Contact an administrator to change your access level.
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div className="grid gap-2">

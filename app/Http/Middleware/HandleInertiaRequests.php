@@ -42,6 +42,8 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'csrfToken' => csrf_token(),
+            'demoTriggersEnabled' => (bool) config('aria.demo_triggers_enabled'),
         ];
     }
 }

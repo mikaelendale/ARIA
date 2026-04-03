@@ -32,6 +32,23 @@ class TwilioService
     }
 
     /**
+     * Call the Twilio REST API to confirm SID + auth token (no messaging charges).
+     *
+     * @return array{sid: string, friendlyName: string|null, status: string}
+     */
+    public function fetchAccount(): array
+    {
+        $sid = (string) config('services.twilio.sid');
+        $account = $this->client()->api->v2010->accounts($sid)->fetch();
+
+        return [
+            'sid' => (string) $account->sid,
+            'friendlyName' => $account->friendlyName,
+            'status' => (string) $account->status,
+        ];
+    }
+
+    /**
      * Send a WhatsApp message. Prefixes whatsapp: on addresses when missing.
      */
     public function sendWhatsapp(string $to, string $body): string

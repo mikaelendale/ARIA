@@ -25,6 +25,7 @@ export function useAgentStatus() {
     const query = useQuery({
         queryKey: ['agents', 'status'],
         queryFn: fetchAgentStatus,
+        refetchInterval: 15_000,
     });
 
     useEffect(() => {

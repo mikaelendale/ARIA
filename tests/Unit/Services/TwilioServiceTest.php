@@ -32,6 +32,19 @@ class TwilioServiceTest extends TestCase
     }
 
     #[Test]
+    public function fetch_account_requires_configuration(): void
+    {
+        config([
+            'services.twilio.sid' => null,
+            'services.twilio.token' => null,
+        ]);
+
+        $this->expectException(InvalidArgumentException::class);
+
+        (new TwilioService)->fetchAccount();
+    }
+
+    #[Test]
     public function send_whatsapp_requires_whatsapp_from(): void
     {
         config([

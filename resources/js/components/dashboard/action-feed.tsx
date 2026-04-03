@@ -1,58 +1,136 @@
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useActionFeedStore } from '@/app/store/useActionFeedStore';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { formatCurrencyETB, formatRelativeTime } from '@/lib/formatters';
 import { cn } from '@/lib/utils';
-import type { AgentName } from '@/types/ops';
+import type { ActionFeedItem } from '@/types/ops';
+import { Copy } from 'lucide-react';
 
-const agentStyles: Record<AgentName, { accent: string; label: string }> = {
+const agentStyles: Record<string, { accent: string; label: string }> = {
     nexus: { accent: 'border-l-blue-500', label: 'Nexus' },
     pulse: { accent: 'border-l-green-500', label: 'Pulse' },
     vera: { accent: 'border-l-purple-500', label: 'Vera' },
     echo: { accent: 'border-l-amber-500', label: 'Echo' },
     hermes: { accent: 'border-l-teal-500', label: 'Hermes' },
     sentinel: { accent: 'border-l-slate-500', label: 'Sentinel' },
+    orchestrator: { accent: 'border-l-indigo-500', label: 'Orchestrator' },
 };
 
-export function ActionFeed() {
+const FILTER_AGENTS = [
+    { id: 'all' as const, label: 'All' },
+    { id: 'nexus', label: 'Nexus' },
+    { id: 'pulse', label: 'Pulse' },
+    { id: 'vera', label: 'Vera' },
+    { id: 'echo', label: 'Echo' },
+    { id: 'hermes', label: 'Hermes' },
+    { id: 'sentinel', label: 'Sentinel' },
+    { id: 'orchestrator', label: 'Orchestrator' },
+];
+
+function styleForAgent(agent: string): { accent: string; label: string } {
+    return agentStyles[agent] ?? { accent: 'border-l-zinc-500', label: agent };
+}
+
+export interface ActionFeedProps {
+    /** Hydrates the store when provided (e.g. from Inertia). */
+    initialActions?: ActionFeedItem[];
+}
+
+export function ActionFeed({ initialActions }: ActionFeedProps) {
     const actions = useActionFeedStore((state) => state.actions);
-    const count = useMemo(() => actions.length, [actions.length]);
+    const setInitialActions = useActionFeedStore((state) => state.setInitialActions);
+    const [filter, setFilter] = useState<string>('all');
+
+    useEffect(() => {
+        if (initialActions === undefined) {
+            return;
+        }
+
+        setInitialActions(initialActions);
+    }, [initialActions, setInitialActions]);
+
+    const filtered = useMemo(() => {
+        if (filter === 'all') {
+            return actions;
+        }
+
+        return actions.filter((a) => a.agent === filter);
+    }, [actions, filter]);
+
+    const copyId = useCallback(async (id: string) => {
+        try {
+            await navigator.clipboard.writeText(id);
+        } catch {
+            /* ignore */
+        }
+    }, []);
 
     return (
-        <Card className="bg-background border-muted rounded-xl p-0 shadow-sm">
-            <div className="flex items-center justify-between p-4">
-                <div className="text-sm font-semibold">Live Action Feed</div>
-                <Badge variant="secondary" className="rounded-md">
-                    {count} events
+        <Card className="border-border/40 bg-muted/10 rounded-md border p-0 shadow-none">
+            <div className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <div className="text-muted-foreground text-xs font-semibold uppercase tracking-[0.18em]">
+                        Live operations
+                    </div>
+                    <div className="text-sm font-semibold">Action feed</div>
+                </div>
+                <Badge variant="secondary" className="w-fit rounded-md tabular-nums">
+                    {filtered.length} events
                 </Badge>
+            </div>
+            <div className="flex flex-wrap gap-1 px-3 pb-2">
+                {FILTER_AGENTS.map((chip) => (
+                    <Button
+                        key={chip.id}
+                        type="button"
+                        variant={filter === chip.id ? 'default' : 'outline'}
+                        size="sm"
+                        className="h-7 rounded-md px-2.5 text-xs"
+                        onClick={() => setFilter(chip.id)}
+                    >
+                        {chip.label}
+                    </Button>
+                ))}
             </div>
             <Separator />
             <ScrollArea className="h-[560px]">
-                <div className="space-y-2 p-3">
-                    {actions.map((item) => {
-                        const style = agentStyles[item.agent];
+                <div className="space-y-1.5 p-2">
+                    {filtered.map((item, i) => {
+                        const style = styleForAgent(item.agent);
 
                         return (
                             <div
                                 key={item.id}
                                 className={cn(
-                                    'border-muted rounded-lg border border-l-4 bg-background p-3',
+                                    'aria-feed-row border-border/50 group rounded-md border border-l-[3px] bg-card/40 p-2.5',
                                     style.accent,
                                 )}
+                                style={{ animationDelay: `${Math.min(i, 14) * 40}ms` }}
                             >
                                 <div className="mb-1 flex items-center justify-between gap-2">
                                     <div className="text-xs font-medium">{style.label}</div>
-                                    <div className="text-muted-foreground text-xs">
-                                        {formatRelativeTime(item.timestamp)}
+                                    <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                                        <span>{formatRelativeTime(item.timestamp)}</span>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
+                                            title="Copy action id"
+                                            onClick={() => copyId(item.id)}
+                                        >
+                                            <Copy className="size-3.5" />
+                                        </Button>
                                     </div>
                                 </div>
                                 <div className="text-foreground text-sm">{item.message}</div>
                                 <div className="text-muted-foreground mt-2 flex items-center justify-between text-xs">
                                     <span>Tool: {item.tool}</span>
-                                    <span>{formatCurrencyETB(item.revenueImpact)}</span>
+                                    <span className="tabular-nums">{formatCurrencyETB(item.revenueImpact)}</span>
                                 </div>
                             </div>
                         );

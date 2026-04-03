@@ -141,3 +141,41 @@
         @apply bg-background text-foreground;
     }
 }
+
+/* Dashboard / feed motion — subtle, not “bouncy” */
+@layer utilities {
+    @keyframes aria-enter {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes aria-live-dot {
+        0%,
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+        50% {
+            opacity: 0.45;
+            transform: scale(0.92);
+        }
+    }
+
+    .aria-animate-in {
+        animation: aria-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .aria-feed-row {
+        animation: aria-enter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .aria-live-dot {
+        animation: aria-live-dot 1.8s ease-in-out infinite;
+    }
+}

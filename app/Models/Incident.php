@@ -19,6 +19,7 @@ class Incident extends Model
         'description',
         'context',
         'status',
+        'review_fingerprint',
         'resolved_by',
         'resolution_time_seconds',
         'resolved_at',

@@ -20,6 +20,9 @@ class PhaseTwoSchemaTest extends TestCase
             'agent_actions',
             'staff',
             'experiences',
+            'experience_bookings',
+            'room_service_orders',
+            'restaurant_visits',
             'agent_conversations',
             'agent_conversation_messages',
         ] as $table) {

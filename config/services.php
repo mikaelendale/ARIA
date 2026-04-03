@@ -40,6 +40,8 @@ return [
         'token' => env('TWILIO_AUTH_TOKEN'),
         'sms_from' => env('TWILIO_PHONE_NUMBER'),
         'whatsapp_from' => env('TWILIO_WHATSAPP_FROM'),
+        /** Voice / Hermes Media Streams — reserved for a future release; inbound voice webhook ignores this for now. */
+        'media_stream_url' => env('TWILIO_MEDIA_STREAM_URL'),
     ],
 
     'openweather' => [

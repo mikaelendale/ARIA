@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
-import { setupEcho } from '@/app/echo';
+import { getEcho, setupEcho } from '@/app/echo';
 
 export function useEcho() {
-    const echo = useMemo(() => setupEcho(), []);
+    return useMemo(() => {
+        setupEcho();
 
-    return echo;
+        return getEcho();
+    }, []);
 }

@@ -11,6 +11,7 @@ import AuthLayout from '@/layouts/auth-layout';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
+import { cn } from '@/lib/utils';
 
 type Props = {
     status?: string;
@@ -18,17 +19,45 @@ type Props = {
     canRegister: boolean;
 };
 
-export default function Login({
-    status,
-    canResetPassword,
-    canRegister,
-}: Props) {
+const DEMO_ACCOUNTS = [
+    { email: 'gm@aria.local', role: 'General Manager' },
+    { email: 'ops@aria.local', role: 'Operations' },
+    { email: 'manager@aria.local', role: 'Department Manager' },
+    { email: 'reception@aria.local', role: 'Reception' },
+    { email: 'viewer@aria.local', role: 'Viewer' },
+];
+
+export default function Login({ status, canResetPassword, canRegister }: Props) {
+    const showDemo = import.meta.env.DEV;
+
     return (
         <AuthLayout
-            title="Log in to your account"
-            description="Enter your email and password below to log in"
+            title="Sign in"
+            description="Access the ARIA operations console for Kuriftu Resort."
         >
             <Head title="Log in" />
+
+            {showDemo && (
+                <div className="border-border/50 bg-muted/25 mb-6 rounded-xl border px-4 py-3 text-left">
+                    <p className="text-muted-foreground mb-2 text-[10px] font-semibold tracking-widest uppercase">
+                        Seeded accounts
+                    </p>
+                    <p className="text-muted-foreground mb-2 text-xs">
+                        Password for each: <span className="text-foreground font-mono">password</span>
+                    </p>
+                    <ul className="max-h-36 space-y-1.5 overflow-y-auto text-xs">
+                        {DEMO_ACCOUNTS.map((row) => (
+                            <li
+                                key={row.email}
+                                className="text-muted-foreground flex justify-between gap-2 border-border/30 border-b border-dashed pb-1 last:border-0"
+                            >
+                                <span className="font-mono text-foreground">{row.email}</span>
+                                <span className="shrink-0 text-[11px]">{row.role}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
 
             <Form
                 {...store.form()}
@@ -37,9 +66,11 @@ export default function Login({
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-6">
+                        <div className="grid gap-5">
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email" className="text-xs font-medium tracking-wide uppercase">
+                                    Email
+                                </Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -48,21 +79,26 @@ export default function Login({
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="email@example.com"
+                                    placeholder="you@resort.com"
+                                    className={cn(
+                                        'h-11 rounded-xl border-border/70 bg-background/50',
+                                        'focus-visible:ring-primary/30',
+                                    )}
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
                             <div className="grid gap-2">
-                                <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                                <div className="flex items-center justify-between gap-2">
+                                    <Label
+                                        htmlFor="password"
+                                        className="text-xs font-medium tracking-wide uppercase"
+                                    >
+                                        Password
+                                    </Label>
                                     {canResetPassword && (
-                                        <TextLink
-                                            href={request()}
-                                            className="ml-auto text-sm"
-                                            tabIndex={5}
-                                        >
-                                            Forgot password?
+                                        <TextLink href={request()} className="text-xs" tabIndex={5}>
+                                            Forgot?
                                         </TextLink>
                                     )}
                                 </div>
@@ -72,37 +108,36 @@ export default function Login({
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder="Password"
+                                    placeholder="••••••••"
+                                    className="h-11 rounded-xl border-border/70 bg-background/50"
                                 />
                                 <InputError message={errors.password} />
                             </div>
 
-                            <div className="flex items-center space-x-3">
-                                <Checkbox
-                                    id="remember"
-                                    name="remember"
-                                    tabIndex={3}
-                                />
-                                <Label htmlFor="remember">Remember me</Label>
+                            <div className="flex items-center gap-3">
+                                <Checkbox id="remember" name="remember" tabIndex={3} />
+                                <Label htmlFor="remember" className="text-muted-foreground text-sm font-normal">
+                                    Remember this device
+                                </Label>
                             </div>
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
+                                className="h-11 w-full rounded-xl text-sm font-semibold shadow-sm"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
                             >
                                 {processing && <Spinner />}
-                                Log in
+                                Continue
                             </Button>
                         </div>
 
                         {canRegister && (
-                            <div className="text-center text-sm text-muted-foreground">
-                                Don't have an account?{' '}
+                            <div className="text-muted-foreground text-center text-sm">
+                                New operator?{' '}
                                 <TextLink href={register()} tabIndex={5}>
-                                    Sign up
+                                    Create account
                                 </TextLink>
                             </div>
                         )}
@@ -111,7 +146,7 @@ export default function Login({
             </Form>
 
             {status && (
-                <div className="mb-4 text-center text-sm font-medium text-green-600">
+                <div className="mt-4 text-center text-sm font-medium text-emerald-600 dark:text-emerald-400">
                     {status}
                 </div>
             )}
