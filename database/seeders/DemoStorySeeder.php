@@ -229,6 +229,7 @@ class DemoStorySeeder extends Seeder
             RoomServiceOrder::query()->create([
                 'guest_id' => $guest->id,
                 'room_number' => (string) $guest->room_number,
+                'items' => $menus[$idx % count($menus)],
                 'status' => 'delivered',
                 'placed_at' => now()->subHours(6 - $idx),
                 'delivered_at' => now()->subHours(5 - $idx),
@@ -238,6 +239,7 @@ class DemoStorySeeder extends Seeder
         RoomServiceOrder::query()->create([
             'guest_id' => $guests[0]->id,
             'room_number' => (string) $guests[0]->room_number,
+            'items' => $menus[0],
             'status' => 'pending',
             'placed_at' => now()->subMinutes(48),
             'delivered_at' => null,
@@ -246,6 +248,7 @@ class DemoStorySeeder extends Seeder
         RoomServiceOrder::query()->create([
             'guest_id' => $guests[2]->id,
             'room_number' => (string) $guests[2]->room_number,
+            'items' => $menus[2],
             'status' => 'pending',
             'placed_at' => now()->subMinutes(95),
             'delivered_at' => null,

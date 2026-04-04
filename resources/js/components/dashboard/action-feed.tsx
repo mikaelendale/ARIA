@@ -6,33 +6,36 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { formatCurrencyETB, formatRelativeTime } from '@/lib/formatters';
+import { friendlyAgentFilterShort, friendlyAgentName } from '@/lib/aria-agent-copy';
 import { cn } from '@/lib/utils';
 import type { ActionFeedItem } from '@/types/ops';
 import { Copy } from 'lucide-react';
 
-const agentStyles: Record<string, { accent: string; label: string }> = {
-    nexus: { accent: 'border-l-blue-500', label: 'Nexus' },
-    pulse: { accent: 'border-l-green-500', label: 'Pulse' },
-    vera: { accent: 'border-l-purple-500', label: 'Vera' },
-    echo: { accent: 'border-l-amber-500', label: 'Echo' },
-    hermes: { accent: 'border-l-teal-500', label: 'Hermes' },
-    sentinel: { accent: 'border-l-slate-500', label: 'Sentinel' },
-    orchestrator: { accent: 'border-l-indigo-500', label: 'Orchestrator' },
+const agentStyles: Record<string, { accent: string }> = {
+    nexus: { accent: 'border-l-blue-500' },
+    pulse: { accent: 'border-l-green-500' },
+    vera: { accent: 'border-l-purple-500' },
+    echo: { accent: 'border-l-amber-500' },
+    hermes: { accent: 'border-l-teal-500' },
+    sentinel: { accent: 'border-l-slate-500' },
+    orchestrator: { accent: 'border-l-indigo-500' },
 };
 
 const FILTER_AGENTS = [
-    { id: 'all' as const, label: 'All' },
-    { id: 'nexus', label: 'Nexus' },
-    { id: 'pulse', label: 'Pulse' },
-    { id: 'vera', label: 'Vera' },
-    { id: 'echo', label: 'Echo' },
-    { id: 'hermes', label: 'Hermes' },
-    { id: 'sentinel', label: 'Sentinel' },
-    { id: 'orchestrator', label: 'Orchestrator' },
-];
+    { id: 'all' as const },
+    { id: 'nexus' },
+    { id: 'pulse' },
+    { id: 'vera' },
+    { id: 'echo' },
+    { id: 'hermes' },
+    { id: 'sentinel' },
+    { id: 'orchestrator' },
+] as const;
 
 function styleForAgent(agent: string): { accent: string; label: string } {
-    return agentStyles[agent] ?? { accent: 'border-l-zinc-500', label: agent };
+    const base = agentStyles[agent] ?? { accent: 'border-l-zinc-500' };
+
+    return { accent: base.accent, label: friendlyAgentName(agent) };
 }
 
 export interface ActionFeedProps {
@@ -74,15 +77,20 @@ export function ActionFeed({ initialActions }: ActionFeedProps) {
             <div className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <div className="text-muted-foreground text-xs font-semibold uppercase tracking-[0.18em]">
-                        Live operations
+                        Live activity
                     </div>
-                    <div className="text-sm font-semibold">Action feed</div>
+                    <div className="text-sm font-semibold">What ARIA did</div>
+                    <p className="text-muted-foreground mt-0.5 max-w-md text-[11px] leading-snug">
+                        New lines appear when the system sends a message, updates pricing, or logs a step. Scroll for
+                        history.
+                    </p>
                 </div>
                 <Badge variant="secondary" className="w-fit rounded-md tabular-nums">
-                    {filtered.length} events
+                    {filtered.length} {filtered.length === 1 ? 'step' : 'steps'}
                 </Badge>
             </div>
-            <div className="flex flex-wrap gap-1 px-3 pb-2">
+            <div className="flex flex-wrap items-center gap-1 px-3 pb-2">
+                <span className="text-muted-foreground mr-1 hidden text-[10px] sm:inline">Show:</span>
                 {FILTER_AGENTS.map((chip) => (
                     <Button
                         key={chip.id}
@@ -90,9 +98,14 @@ export function ActionFeed({ initialActions }: ActionFeedProps) {
                         variant={filter === chip.id ? 'default' : 'outline'}
                         size="sm"
                         className="h-7 rounded-md px-2.5 text-xs"
+                        title={
+                            chip.id === 'all'
+                                ? 'Show every step'
+                                : `${friendlyAgentName(chip.id)} (technical name: ${chip.id})`
+                        }
                         onClick={() => setFilter(chip.id)}
                     >
-                        {chip.label}
+                        {friendlyAgentFilterShort(chip.id)}
                     </Button>
                 ))}
             </div>
@@ -120,7 +133,7 @@ export function ActionFeed({ initialActions }: ActionFeedProps) {
                                             variant="ghost"
                                             size="icon"
                                             className="size-7 opacity-0 transition-opacity group-hover:opacity-100"
-                                            title="Copy action id"
+                                            title="Copy reference ID"
                                             onClick={() => copyId(item.id)}
                                         >
                                             <Copy className="size-3.5" />
@@ -129,7 +142,9 @@ export function ActionFeed({ initialActions }: ActionFeedProps) {
                                 </div>
                                 <div className="text-foreground text-sm">{item.message}</div>
                                 <div className="text-muted-foreground mt-2 flex items-center justify-between text-xs">
-                                    <span>Tool: {item.tool}</span>
+                                    <span>
+                                        Action: <span className="text-foreground/90 font-mono text-[10px]">{item.tool}</span>
+                                    </span>
                                     <span className="tabular-nums">{formatCurrencyETB(item.revenueImpact)}</span>
                                 </div>
                             </div>

@@ -86,7 +86,7 @@ The technical owner of ARIA. Could be the hotel's IT lead or the team that built
 
 ---
 
-## **2 Sub-Agents**
+## **2 Sub-Agents–**
 
 ARIA is not one agent. She is **6 specialized sub-agents** all coordinated by a central orchestrator. Each sub-agent has a single focused job.
 

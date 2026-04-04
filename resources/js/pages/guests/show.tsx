@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { formatCurrencyETB, formatRelativeTime, formatTimeAgo } from '@/lib/formatters';
+import { friendlyAgentName } from '@/lib/aria-agent-copy';
 import AppLayout from '@/layouts/app-layout';
 import type { GuestDetail } from '@/types/ops';
 import { show as incidentShow } from '@/routes/incidents';
@@ -42,15 +43,18 @@ export default function GuestShow() {
     return (
         <AppLayout
             breadcrumbs={[
+                { title: 'Overview', href: '/dashboard' },
                 { title: 'Guests', href: guestsIndex.url() },
                 { title: guest.name, href: `/guests/${guest.id}` },
             ]}
         >
-            <Head title={`Guest — ${guest.name}`} />
+            <Head title={`${guest.name} — Guest`} />
             <div className="mx-auto max-w-5xl space-y-4 p-4">
                 <div className="grid gap-4 lg:grid-cols-2">
                     <Card className="rounded-xl border-muted p-4 shadow-sm">
-                        <h2 className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">Profile</h2>
+                        <h2 className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
+                            Guest details
+                        </h2>
                         <div className="space-y-2 text-sm">
                             <div className="text-lg font-semibold tracking-tight">{guest.name}</div>
                             <div className="text-muted-foreground">Room {guest.room || '—'}</div>
@@ -60,10 +64,14 @@ export default function GuestShow() {
                     </Card>
                     <Card className="rounded-xl border-muted p-4 shadow-sm">
                         <h2 className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
-                            Churn & preferences
+                            Risk & preferences
                         </h2>
+                        <p className="text-muted-foreground mb-2 text-xs leading-relaxed">
+                            Risk is an estimate of how likely this guest is to leave unhappy. Preferences help staff
+                            personalize service.
+                        </p>
                         <div className="space-y-3">
-                            <ChurnScoreBar score={guest.churnScore} label="Risk score" />
+                            <ChurnScoreBar score={guest.churnScore} label="Leave risk" />
                             <div className="flex flex-wrap items-center gap-2">
                                 <Badge variant={guest.vip ? 'default' : 'secondary'}>{guest.vip ? 'VIP' : 'Standard'}</Badge>
                                 {tags.length === 0 ? (
@@ -105,10 +113,10 @@ export default function GuestShow() {
                     </ul>
                 </SectionCard>
 
-                <SectionCard title="Incidents">
+                <SectionCard title="Related issues">
                     <ul className="space-y-2 text-sm">
                         {guest.incidents.length === 0 ? (
-                            <li className="text-muted-foreground">No incidents</li>
+                            <li className="text-muted-foreground">No linked issues</li>
                         ) : (
                             guest.incidents.map((i) => (
                                 <li key={i.id}>
@@ -132,9 +140,9 @@ export default function GuestShow() {
                     </ul>
                 </SectionCard>
 
-                <SectionCard title="Agent activity">
+                <SectionCard title="What the system did for this guest">
                     {guest.agentActions.length === 0 ? (
-                        <p className="text-muted-foreground text-sm">No actions</p>
+                        <p className="text-muted-foreground text-sm">No steps recorded yet.</p>
                     ) : (
                         <ul className="relative ms-3 space-y-6 border-s border-muted pb-1 ps-6">
                             {guest.agentActions.map((a) => (
@@ -143,9 +151,11 @@ export default function GuestShow() {
                                         className="bg-primary absolute top-1.5 -left-[29px] size-2.5 rounded-full ring-2 ring-background"
                                         aria-hidden
                                     />
-                                    <div className="text-xs font-medium capitalize">
-                                        {a.agent}{' '}
-                                        <span className="text-muted-foreground font-normal">/ {a.tool}</span>
+                                    <div className="text-xs font-medium">
+                                        {friendlyAgentName(a.agent)}{' '}
+                                        <span className="text-muted-foreground font-normal font-mono text-[10px]">
+                                            · {a.tool}
+                                        </span>
                                     </div>
                                     <div className="text-muted-foreground mt-0.5 text-xs tabular-nums">
                                         {a.timestamp ? (

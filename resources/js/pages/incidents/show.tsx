@@ -2,6 +2,7 @@ import { Head, usePage } from '@inertiajs/react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { formatRelativeTime, formatTimeAgo } from '@/lib/formatters';
+import { friendlyAgentName } from '@/lib/aria-agent-copy';
 import AppLayout from '@/layouts/app-layout';
 import type { IncidentDetail } from '@/types/ops';
 import { index as incidentsIndex } from '@/routes/incidents';
@@ -36,11 +37,12 @@ export default function IncidentShow() {
     return (
         <AppLayout
             breadcrumbs={[
-                { title: 'Incidents', href: incidentsIndex.url() },
+                { title: 'Overview', href: '/dashboard' },
+                { title: 'Issues', href: incidentsIndex.url() },
                 { title: incident.type, href: `/incidents/${incident.id}` },
             ]}
         >
-            <Head title={`Incident — ${incident.type}`} />
+            <Head title={`Issue — ${incident.type}`} />
             <div className="mx-auto max-w-3xl space-y-4 p-4">
                 <Card className="rounded-xl border-muted p-4 shadow-sm">
                     <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -60,7 +62,7 @@ export default function IncidentShow() {
                             </dd>
                         </div>
                         <div className="flex flex-wrap gap-x-2">
-                            <dt className="font-medium text-foreground">Resolution</dt>
+                            <dt className="font-medium text-foreground">Time to close</dt>
                             <dd>{incident.resolutionTime ?? '—'}</dd>
                         </div>
                     </dl>
@@ -70,11 +72,14 @@ export default function IncidentShow() {
                 </Card>
 
                 <Card className="rounded-xl border-muted p-4 shadow-sm">
-                    <h3 className="text-muted-foreground mb-4 text-xs font-semibold uppercase tracking-wider">
-                        Tool timeline
+                    <h3 className="text-muted-foreground mb-2 text-xs font-semibold uppercase tracking-wider">
+                        What happened (step by step)
                     </h3>
+                    <p className="text-muted-foreground mb-4 text-xs leading-relaxed">
+                        Each line is something the system did while this issue was open.
+                    </p>
                     {incident.agentActions.length === 0 ? (
-                        <p className="text-muted-foreground text-sm">No agent actions</p>
+                        <p className="text-muted-foreground text-sm">Nothing logged for this issue yet.</p>
                     ) : (
                         <ul className="relative ms-3 space-y-6 border-s border-muted pb-1 ps-6">
                             {incident.agentActions.map((a) => (
@@ -83,9 +88,11 @@ export default function IncidentShow() {
                                         className="bg-primary absolute top-1.5 -left-[29px] size-2.5 rounded-full ring-2 ring-background"
                                         aria-hidden
                                     />
-                                    <div className="text-xs font-medium capitalize">
-                                        {a.agent}{' '}
-                                        <span className="text-muted-foreground font-normal">· {a.tool}</span>
+                                    <div className="text-xs font-medium">
+                                        {friendlyAgentName(a.agent)}{' '}
+                                        <span className="text-muted-foreground font-normal font-mono text-[10px]">
+                                            · {a.tool}
+                                        </span>
                                     </div>
                                     <div className="text-muted-foreground mt-0.5 text-xs tabular-nums">
                                         {a.timestamp ? (

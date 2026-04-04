@@ -37,8 +37,11 @@ export function LiveCounter() {
     return (
         <Card className="border-border/50 bg-muted/15 rounded-lg border p-3 shadow-none">
             <div className="text-muted-foreground mb-0.5 text-xs font-semibold uppercase tracking-[0.18em]">
-                Pulse revenue impact (today)
+                Extra revenue today (pricing)
             </div>
+            <p className="text-muted-foreground mb-1 text-[11px] leading-snug">
+                Rough ETB linked to pricing and promo moves. Not your full P&amp;L.
+            </p>
             <div className="text-xl font-semibold tabular-nums tracking-tight">
                 {formatCurrencyETB(Math.round(animatedValue))}
             </div>
