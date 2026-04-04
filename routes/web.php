@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AriaDashboardChatController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\IncidentController;
@@ -35,6 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('incidents/{incident}', [IncidentController::class, 'show'])->name('incidents.show');
 
     Route::post('api/trigger/scenario', TriggerScenarioController::class)->name('api.trigger.scenario');
+    Route::post('api/ops/aria/chat', AriaDashboardChatController::class)->name('api.ops.aria.chat');
 
     Route::prefix('api/ops')->group(function () {
         Route::get('dashboard/stats', fn () => response()->json(OpsData::dashboardPayload()));
