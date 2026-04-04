@@ -20,11 +20,11 @@ type Props = {
 };
 
 const DEMO_ACCOUNTS = [
-    { email: 'gm@aria.local', role: 'General Manager' },
-    { email: 'ops@aria.local', role: 'Operations' },
-    { email: 'manager@aria.local', role: 'Department Manager' },
-    { email: 'reception@aria.local', role: 'Reception' },
-    { email: 'viewer@aria.local', role: 'Viewer' },
+    { email: 'gm@aria.local', label: 'General manager' },
+    { email: 'ops@aria.local', label: 'Front office & ops' },
+    { email: 'manager@aria.local', label: 'Department lead' },
+    { email: 'reception@aria.local', label: 'Reception' },
+    { email: 'viewer@aria.local', label: 'View only' },
 ];
 
 export default function Login({ status, canResetPassword, canRegister }: Props) {
@@ -32,18 +32,17 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
 
     return (
         <AuthLayout
-            title="Sign in"
-            description="Access the ARIA operations console for Kuriftu Resort."
+            title="Welcome back"
+            description="Use the email and password from your team. You’ll open the same guest and room overview your colleagues use."
         >
-            <Head title="Log in" />
+            <Head title="Sign in" />
 
             {showDemo && (
                 <div className="border-border/50 bg-muted/25 mb-6 rounded-xl border px-4 py-3 text-left">
-                    <p className="text-muted-foreground mb-2 text-[10px] font-semibold tracking-widest uppercase">
-                        Seeded accounts
-                    </p>
-                    <p className="text-muted-foreground mb-2 text-xs">
-                        Password for each: <span className="text-foreground font-mono">password</span>
+                    <p className="text-foreground mb-1 text-sm font-medium">Try the app on this computer</p>
+                    <p className="text-muted-foreground mb-3 text-xs leading-relaxed">
+                        Sample sign-ins for local testing. Use the password:{' '}
+                        <span className="text-foreground font-medium">password</span>
                     </p>
                     <ul className="max-h-36 space-y-1.5 overflow-y-auto text-xs">
                         {DEMO_ACCOUNTS.map((row) => (
@@ -52,7 +51,7 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                                 className="text-muted-foreground flex justify-between gap-2 border-border/30 border-b border-dashed pb-1 last:border-0"
                             >
                                 <span className="font-mono text-foreground">{row.email}</span>
-                                <span className="shrink-0 text-[11px]">{row.role}</span>
+                                <span className="shrink-0 text-[11px]">{row.label}</span>
                             </li>
                         ))}
                     </ul>
@@ -68,7 +67,7 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                     <>
                         <div className="grid gap-5">
                             <div className="grid gap-2">
-                                <Label htmlFor="email" className="text-xs font-medium tracking-wide uppercase">
+                                <Label htmlFor="email" className="text-sm font-medium">
                                     Email
                                 </Label>
                                 <Input
@@ -79,7 +78,7 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="you@resort.com"
+                                    placeholder="name@yourworkemail.com"
                                     className={cn(
                                         'h-11 rounded-xl border-border/70 bg-background/50',
                                         'focus-visible:ring-primary/30',
@@ -90,15 +89,12 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
 
                             <div className="grid gap-2">
                                 <div className="flex items-center justify-between gap-2">
-                                    <Label
-                                        htmlFor="password"
-                                        className="text-xs font-medium tracking-wide uppercase"
-                                    >
+                                    <Label htmlFor="password" className="text-sm font-medium">
                                         Password
                                     </Label>
                                     {canResetPassword && (
                                         <TextLink href={request()} className="text-xs" tabIndex={5}>
-                                            Forgot?
+                                            Forgot password?
                                         </TextLink>
                                     )}
                                 </div>
@@ -108,7 +104,7 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder="••••••••"
+                                    placeholder="Your password"
                                     className="h-11 rounded-xl border-border/70 bg-background/50"
                                 />
                                 <InputError message={errors.password} />
@@ -116,8 +112,8 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
 
                             <div className="flex items-center gap-3">
                                 <Checkbox id="remember" name="remember" tabIndex={3} />
-                                <Label htmlFor="remember" className="text-muted-foreground text-sm font-normal">
-                                    Remember this device
+                                <Label htmlFor="remember" className="text-muted-foreground text-sm font-normal leading-snug">
+                                    Stay signed in on this device
                                 </Label>
                             </div>
 
@@ -129,15 +125,15 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                                 data-test="login-button"
                             >
                                 {processing && <Spinner />}
-                                Continue
+                                Sign in
                             </Button>
                         </div>
 
                         {canRegister && (
-                            <div className="text-muted-foreground text-center text-sm">
-                                New operator?{' '}
+                            <div className="text-muted-foreground text-center text-sm leading-relaxed">
+                                New here?{' '}
                                 <TextLink href={register()} tabIndex={5}>
-                                    Create account
+                                    Create an account
                                 </TextLink>
                             </div>
                         )}
@@ -146,7 +142,10 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
             </Form>
 
             {status && (
-                <div className="mt-4 text-center text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                <div
+                    className="mt-4 text-center text-sm font-medium text-emerald-600 dark:text-emerald-400"
+                    role="status"
+                >
                     {status}
                 </div>
             )}

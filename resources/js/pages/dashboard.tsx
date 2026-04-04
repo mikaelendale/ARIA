@@ -10,6 +10,7 @@ import { ActionFeed } from '@/components/dashboard/action-feed';
 import { AgentStatusCard } from '@/components/dashboard/agent-status-card';
 import { ChurnBoard } from '@/components/dashboard/churn-board';
 import { DashboardOverview } from '@/components/dashboard/dashboard-overview';
+import { DashboardTourProvider, DashboardTourTrigger } from '@/components/dashboard/dashboard-tour';
 import { DemoScenariosPanel } from '@/components/dashboard/demo-scenarios-panel';
 import { LiveCounter } from '@/components/dashboard/live-counter';
 import { QueueOpsStrip } from '@/components/dashboard/queue-ops-strip';
@@ -37,23 +38,23 @@ const breadcrumbs: BreadcrumbItem[] = [
 const HERO_COPY: Record<string, { kicker: string; title: string; body: string }> = {
     command: {
         kicker: 'Good day',
-        title: 'Your resort is speaking plainly',
-        body: 'We pulled the big numbers, a gentle pulse line, and a few friendly charts so you can see the story in seconds — then scroll to what ARIA did last.',
+        title: 'Here’s how the resort looks today',
+        body: 'Big numbers, simple charts, and a short story you can read in a glance. Scroll down to see what the assistant did most recently.',
     },
     operations: {
         kicker: 'Good day',
-        title: 'Operations snapshot',
-        body: 'Same snapshot for every shift: who is here, what is open, where the queues are, and what the AI touched — without opening a spreadsheet.',
+        title: 'Your shift at a glance',
+        body: 'Who is staying, what still needs attention, and how busy we are — in one screen, no spreadsheet.',
     },
     floor: {
         kicker: 'Today',
-        title: 'Team snapshot',
-        body: 'Start with the charts and the pulse line; dip into Guests or Issues when you need a name or a case. No jargon required.',
+        title: 'Your team snapshot',
+        body: 'Start with the charts below. Open Guests or Issues from the top when you need a name or a case.',
     },
     'read-only': {
         kicker: 'Summary',
-        title: 'High-level read',
-        body: 'Counts and charts only. Ask operations for the full live feed if you need step-by-step detail.',
+        title: 'Today’s headline numbers',
+        body: 'High-level counts only. Ask your lead if you need the full live list.',
     },
 };
 
@@ -175,34 +176,67 @@ export default function Dashboard() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Overview — Kuriftu" />
-            <div className="flex min-h-0 flex-1 flex-col gap-2.5 py-2 pb-28 sm:pb-24">
-                <AnimatePresence mode="wait">
-                    {!chatUiOpen ? (
-                        <motion.div
-                            key="dashboard"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0, y: -12 }}
-                            transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-                            className="flex flex-col gap-2.5"
-                        >
-                            <QueueOpsStrip snapshot={queueSnapshot} />
+            <DashboardTourProvider vis={vis} hasQueueSnapshot={queueSnapshot != null}>
+                <div className="flex min-h-0 flex-1 flex-col gap-2.5 py-2 pb-28 sm:pb-24">
+                    <AnimatePresence mode="wait">
+                        {!chatUiOpen ? (
+                            <motion.div
+                                key="dashboard"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0, y: -12 }}
+                                transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+                                className="flex flex-col gap-2.5"
+                            >
+                                {queueSnapshot ? (
+                                    <div data-tour="dashboard-queue">
+                                        <QueueOpsStrip snapshot={queueSnapshot} />
+                                    </div>
+                                ) : null}
 
-                            <DashboardOverview
-                                hero={hero}
-                                roleBadge={roleLabel(role)}
-                                stats={statsQuery.data}
-                                actions={initialActions}
-                                showPulseRevenue={vis.showPulseRevenue}
-                                showLiveHint={vis.showLiveFeed}
-                            />
+                                {vis.showDemoPanel ? (
+                                    <div
+                                        data-tour="dashboard-practice"
+                                        className="aria-animate-in space-y-2 pb-1"
+                                        style={{ animationDelay: '100ms' }}
+                                    >
+                                        <div className="border-border/50 flex items-start gap-2 border-b pb-1.5">
+                                            <FlaskConical
+                                                className="text-foreground/65 mt-0.5 size-3.5 shrink-0 stroke-[1.75]"
+                                                aria-hidden
+                                            />
+                                            <div className="min-w-0 space-y-0.5">
+                                                <p className="text-foreground text-sm font-semibold">Practice runs</p>
+                                                <p className="text-muted-foreground max-w-xl text-[11px] leading-snug">
+                                                    Safe, fake scenarios for tours and training. Tap one when you are ready
+                                                    — then watch the live list below respond.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <DemoScenariosPanel />
+                                    </div>
+                                ) : null}
 
-                            {(vis.showLiveFeed || vis.showSignalsColumn) && (
-                                <div className="aria-animate-in space-y-2" style={{ animationDelay: '40ms' }}>
+                                <DashboardOverview
+                                    hero={hero}
+                                    roleBadge={roleLabel(role)}
+                                    stats={statsQuery.data}
+                                    actions={initialActions}
+                                    showPulseRevenue={vis.showPulseRevenue}
+                                    showLiveHint={vis.showLiveFeed}
+                                    tourButton={<DashboardTourTrigger />}
+                                />
+
+                                {(vis.showLiveFeed || vis.showSignalsColumn) && (
+                                    <div
+                                        data-tour="dashboard-activity"
+                                        className="aria-animate-in space-y-2"
+                                        style={{ animationDelay: '40ms' }}
+                                    >
                                     <div className="border-border/50 flex items-center gap-2 border-b pb-1.5">
                                         <History className="text-foreground/65 size-3.5 shrink-0 stroke-[1.75]" aria-hidden />
                                         <p className="text-muted-foreground text-[10px] font-semibold tracking-[0.18em] uppercase">
-                                            {vis.showLiveFeed ? 'What ARIA did last' : 'Side panels'}
+                                            {vis.showLiveFeed ? 'What happened recently' : 'Side panels'}
                                         </p>
                                     </div>
                                     <div className="grid min-h-[340px] grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1.12fr)_minmax(248px,1fr)]">
@@ -240,25 +274,6 @@ export default function Dashboard() {
                                     <ChurnBoard score={churnScore} />
                                 </div>
                             )}
-
-                            {vis.showDemoPanel ? (
-                                <div className="aria-animate-in space-y-2 pb-1" style={{ animationDelay: '100ms' }}>
-                                    <div className="border-border/50 flex items-start gap-2 border-b pb-1.5">
-                                        <FlaskConical
-                                            className="text-foreground/65 mt-0.5 size-3.5 shrink-0 stroke-[1.75]"
-                                            aria-hidden
-                                        />
-                                        <div className="min-w-0 space-y-0.5">
-                                            <p className="text-foreground text-sm font-semibold">Practice runs</p>
-                                            <p className="text-muted-foreground max-w-xl text-[11px] leading-snug">
-                                                Safe, fake scenarios for tours and training. Tap one when you are ready —
-                                                then watch the live list above respond.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <DemoScenariosPanel />
-                                </div>
-                            ) : null}
                         </motion.div>
                     ) : (
                         <motion.div
@@ -278,7 +293,10 @@ export default function Dashboard() {
                     )}
                 </AnimatePresence>
 
-                <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-3 pb-3 sm:pb-4">
+                <div
+                    data-tour="dashboard-ask"
+                    className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-3 pb-3 sm:pb-4"
+                >
                     <div className="pointer-events-auto flex w-full max-w-4xl flex-col gap-2">
                         {!chatUiOpen ? (
                             <div className="flex justify-end">
@@ -305,11 +323,12 @@ export default function Dashboard() {
                         <PromptInputBox
                             onSend={(msg, files) => void sendAriaChat(msg, files)}
                             isLoading={chatLoading}
-                            copy={{ defaultPlaceholder: 'Ask ARIA about your resort…' }}
+                            copy={{ defaultPlaceholder: 'Ask anything about guests, rooms, or today…' }}
                         />
                     </div>
                 </div>
-            </div>
+                </div>
+            </DashboardTourProvider>
         </AppLayout>
     );
 }

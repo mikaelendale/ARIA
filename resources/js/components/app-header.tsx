@@ -7,7 +7,6 @@ import {
     Sparkles,
     Users,
 } from 'lucide-react';
-import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Button } from '@/components/ui/button';

@@ -25,18 +25,19 @@ export default function AuthSimpleLayout({
                 }}
             />
 
-            <div className="relative z-10 w-full max-w-md">
+            <main className="relative z-10 w-full max-w-md">
                 <div className="mb-8 flex flex-col items-center gap-5 text-center">
                     <Link
                         href={home()}
                         className="group flex flex-col items-center gap-3 transition-opacity hover:opacity-90"
+                        aria-label="Go to home page"
                     >
                         <div className="flex size-12 items-center justify-center rounded-2xl border border-border/60 bg-card/80 shadow-sm backdrop-blur-sm dark:bg-card/50">
                             <AppLogoIcon className="size-7 fill-foreground" />
                         </div>
-                        <span className="text-muted-foreground inline-flex items-center gap-1.5 text-xs font-medium tracking-widest uppercase">
-                            <Sparkles className="size-3.5 text-amber-600/80 dark:text-amber-400/80" />
-                            ARIA
+                        <span className="text-muted-foreground inline-flex items-center gap-1.5 text-xs font-medium">
+                            <Sparkles className="size-3.5 text-amber-600/80 dark:text-amber-400/80" aria-hidden />
+                            Kuriftu Resort
                         </span>
                     </Link>
 
@@ -48,12 +49,19 @@ export default function AuthSimpleLayout({
                             {description}
                         </p>
                     </div>
+
+                    <Link
+                        href={home()}
+                        className="text-muted-foreground hover:text-foreground text-sm underline-offset-4 transition-colors hover:underline"
+                    >
+                        ← Back to home
+                    </Link>
                 </div>
 
                 <div className="border-border/60 bg-card/90 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.25)] backdrop-blur-md dark:shadow-[0_24px_80px_-24px_rgba(0,0,0,0.5)] rounded-2xl border p-8 md:p-9">
                     {children}
                 </div>
-            </div>
+            </main>
         </div>
     );
 }

@@ -155,6 +155,8 @@ type Props = {
     actions: ActionFeedItem[] | undefined;
     showPulseRevenue: boolean;
     showLiveHint: boolean;
+    /** Optional control (e.g. guided tour trigger) shown in the hero row. */
+    tourButton?: ReactNode;
 };
 
 export function DashboardOverview({
@@ -164,6 +166,7 @@ export function DashboardOverview({
     actions,
     showPulseRevenue,
     showLiveHint,
+    tourButton,
 }: Props) {
     const s = stats ?? {
         guests: 0,
@@ -272,7 +275,10 @@ export function DashboardOverview({
 
     return (
         <div className="space-y-3">
-            <div className="rounded-xl border border-border/50 bg-muted/20 p-3 shadow-sm sm:p-4">
+            <div
+                data-tour="dashboard-welcome"
+                className="rounded-xl border border-border/50 bg-muted/20 p-3 shadow-sm sm:p-4"
+            >
                 <div className="flex flex-col gap-2.5 lg:flex-row lg:items-end lg:justify-between">
                     <div className="max-w-2xl space-y-1.5">
                         <div className="flex flex-wrap items-center gap-1.5">
@@ -289,10 +295,11 @@ export function DashboardOverview({
                                     Live
                                 </span>
                             ) : null}
+                            {tourButton ? <span className="ml-auto shrink-0 sm:ml-0">{tourButton}</span> : null}
                         </div>
                         <h1 className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl">{hero.title}</h1>
                         <p className="text-muted-foreground max-w-xl text-[13px] leading-snug">{hero.body}</p>
-                        <div className="flex flex-wrap gap-1 pt-0.5">
+                        <div data-tour="dashboard-shortcuts" className="flex flex-wrap gap-1 pt-0.5">
                             <Link
                                 href={revenue()}
                                 prefetch
@@ -333,7 +340,7 @@ export function DashboardOverview({
                 </div>
             </div>
 
-            <div>
+            <div data-tour="dashboard-glance">
                 <p className="text-muted-foreground mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.2em] uppercase">
                     <LayoutGrid className="text-foreground/65 size-3.5 stroke-[1.75]" aria-hidden />
                     At a glance
