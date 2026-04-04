@@ -1,5 +1,6 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatRelativeTime, formatTimeAgo } from '@/lib/formatters';
+import { friendlyAgentName } from '@/lib/aria-agent-copy';
 import { cn } from '@/lib/utils';
 import type { AgentMeta } from '@/types/ops';
 
@@ -20,7 +21,7 @@ export function AgentStatusBadge({ agent, className }: AgentStatusBadgeProps) {
     const inner = (
         <>
             <span className={cn('size-2 shrink-0 rounded-full', statusDot[agent.status])} aria-hidden />
-            <span className="truncate text-sm capitalize">{agent.name}</span>
+            <span className="truncate text-sm">{friendlyAgentName(agent.name)}</span>
         </>
     );
 
@@ -43,6 +44,7 @@ export function AgentStatusBadge({ agent, className }: AgentStatusBadgeProps) {
                 </button>
             </TooltipTrigger>
             <TooltipContent side="left" className="max-w-xs">
+                <p className="text-primary-foreground/70 text-[10px] uppercase tracking-wide">System name: {agent.name}</p>
                 <p className="font-medium">{formatTimeAgo(agent.lastRun)}</p>
                 <p className="text-primary-foreground/80">{formatRelativeTime(agent.lastRun)}</p>
             </TooltipContent>

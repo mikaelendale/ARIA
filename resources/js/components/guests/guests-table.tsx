@@ -39,7 +39,7 @@ export function GuestsTable({ data }: { data: Guest[] }) {
             { accessorKey: 'room', header: 'Room' },
             {
                 accessorKey: 'churnScore',
-                header: 'Churn',
+                header: 'Leave risk',
                 cell: ({ row }) => <ChurnScoreBar score={row.original.churnScore} className="max-w-[200px]" />,
             },
             {
@@ -83,7 +83,7 @@ export function GuestsTable({ data }: { data: Guest[] }) {
     return (
         <div className="space-y-3">
             <Input
-                placeholder="Filter guests by name..."
+                placeholder="Search by guest name…"
                 value={nameFilter}
                 onChange={(event) => setNameFilter(event.target.value)}
                 className="max-w-sm"

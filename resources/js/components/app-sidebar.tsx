@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, ShieldAlert, Users } from 'lucide-react';
+import { BookOpen, FolderGit2, LayoutGrid, LineChart, ShieldAlert, Users } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -13,14 +13,19 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+import { dashboard, revenue } from '@/routes';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
+        title: 'Overview',
         href: dashboard(),
         icon: LayoutGrid,
+    },
+    {
+        title: 'Revenue',
+        href: revenue(),
+        icon: LineChart,
     },
     {
         title: 'Guests',
@@ -28,7 +33,7 @@ const mainNavItems: NavItem[] = [
         icon: Users,
     },
     {
-        title: 'Incidents',
+        title: 'Issues',
         href: '/incidents',
         icon: ShieldAlert,
     },

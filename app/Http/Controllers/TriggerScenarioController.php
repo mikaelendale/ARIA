@@ -47,6 +47,7 @@ class TriggerScenarioController extends Controller
         $order = RoomServiceOrder::query()->create([
             'guest_id' => $guest->id,
             'room_number' => (string) ($guest->room_number ?: 'KV-001'),
+            'items' => 'Demo delayed tray — guest request (scenario)',
             'status' => 'pending',
             'placed_at' => now()->subMinutes(40),
         ]);

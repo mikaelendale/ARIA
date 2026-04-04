@@ -3,6 +3,8 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\IncidentController;
+use App\Http\Controllers\KitchenBoardController;
+use App\Http\Controllers\RevenueController;
 use App\Http\Controllers\TriggerScenarioController;
 use App\Http\Controllers\WebhookController;
 use App\Models\Guest;
@@ -18,8 +20,15 @@ Route::inertia('/', 'welcome', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
+Route::middleware(['kitchen.board'])->group(function () {
+    Route::get('/kitchen', [KitchenBoardController::class, 'index'])->name('kitchen.index');
+    Route::post('/kitchen/orders/{room_service_order}/delivered', [KitchenBoardController::class, 'markDelivered'])
+        ->name('kitchen.orders.delivered');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('revenue', [RevenueController::class, 'index'])->name('revenue');
     Route::get('guests', [GuestController::class, 'index'])->name('guests.index');
     Route::get('guests/{guest}', [GuestController::class, 'show'])->name('guests.show');
     Route::get('incidents', [IncidentController::class, 'index'])->name('incidents.index');

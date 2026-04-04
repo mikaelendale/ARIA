@@ -49,7 +49,7 @@ export function IncidentsTable({ data }: { data: Incident[] }) {
         () => [
             {
                 accessorKey: 'type',
-                header: 'Type',
+                header: 'Topic',
                 cell: ({ row }) => (
                     <Link
                         href={incidentShow.url(row.original.id)}
@@ -61,7 +61,7 @@ export function IncidentsTable({ data }: { data: Incident[] }) {
             },
             {
                 accessorKey: 'severity',
-                header: 'Severity',
+                header: 'Urgency',
                 cell: ({ row }) => (
                     <Badge
                         variant={severityBadgeVariant(row.original.severity)}
@@ -80,7 +80,7 @@ export function IncidentsTable({ data }: { data: Incident[] }) {
                     </Badge>
                 ),
             },
-            { accessorKey: 'resolutionTime', header: 'Resolution' },
+            { accessorKey: 'resolutionTime', header: 'Time to close' },
             {
                 accessorKey: 'createdAt',
                 header: 'Opened',
@@ -113,7 +113,7 @@ export function IncidentsTable({ data }: { data: Incident[] }) {
     return (
         <div className="space-y-3">
             <Input
-                placeholder="Filter incidents by type..."
+                placeholder="Search by topic or keyword…"
                 value={typeFilter}
                 onChange={(event) => setTypeFilter(event.target.value)}
                 className="max-w-sm"

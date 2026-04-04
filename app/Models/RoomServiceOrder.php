@@ -13,6 +13,7 @@ class RoomServiceOrder extends Model
     protected $fillable = [
         'guest_id',
         'room_number',
+        'items',
         'status',
         'placed_at',
         'delivered_at',

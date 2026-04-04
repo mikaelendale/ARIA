@@ -21,9 +21,12 @@ export function AgentStatusCard() {
 
     return (
         <Card className="border-border/50 bg-muted/15 rounded-lg border p-3 shadow-none">
-            <div className="text-muted-foreground mb-2 text-xs font-semibold uppercase tracking-[0.18em]">
-                Agent status
+            <div className="text-muted-foreground mb-0.5 text-xs font-semibold uppercase tracking-[0.18em]">
+                AI helpers
             </div>
+            <p className="text-muted-foreground mb-2 text-[11px] leading-snug">
+                Green means that helper ran recently. Hover a row for the exact time.
+            </p>
             <div className="space-y-1.5">
                 {primary.map((agent) => (
                     <div
@@ -40,7 +43,7 @@ export function AgentStatusCard() {
 
             <Collapsible defaultOpen className="group/coll mt-3">
                 <CollapsibleTrigger className="text-muted-foreground hover:text-foreground flex w-full items-center justify-between rounded-md py-1 text-xs font-medium transition-colors">
-                    <span>Core</span>
+                    <span>Head assistant (coordinates the others)</span>
                     <ChevronDown className="size-4 transition-transform group-data-[state=open]/coll:rotate-180" />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pt-2">

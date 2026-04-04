@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     LayoutGrid,
+    LineChart,
     Menu,
     ShieldAlert,
     Sparkles,
@@ -32,7 +33,7 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { roleLabel } from '@/lib/aria-roles';
 import { cn } from '@/lib/utils';
-import { dashboard } from '@/routes';
+import { dashboard, revenue } from '@/routes';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
 type Props = {
@@ -40,13 +41,14 @@ type Props = {
 };
 
 const mainNavItems: NavItem[] = [
-    { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
+    { title: 'Overview', href: dashboard(), icon: LayoutGrid },
+    { title: 'Revenue', href: revenue(), icon: LineChart },
     { title: 'Guests', href: '/guests', icon: Users },
-    { title: 'Incidents', href: '/incidents', icon: ShieldAlert },
+    { title: 'Issues', href: '/incidents', icon: ShieldAlert },
 ];
 
 const activeStyles =
-    'bg-muted/80 text-foreground shadow-sm';
+    'bg-muted/80 text-foreground border';
 
 export function AppHeader({ breadcrumbs = [] }: Props) {
     const page = usePage();
@@ -56,7 +58,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
     return (
         <>
             <header className="sticky top-0 z-50 border-b border-border/60 bg-background/75 backdrop-blur-xl">
-                <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-3 px-4 sm:h-16 sm:px-6">
+                <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4 sm:h-16 sm:px-6">
                     <div className="lg:hidden">
                         <Sheet>
                             <SheetTrigger asChild>
@@ -68,8 +70,8 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                 <SheetTitle className="sr-only">Navigation</SheetTitle>
                                 <SheetHeader className="border-b border-border/50 pb-4 text-left">
                                     <AppLogoIcon className="size-8 fill-foreground" />
-                                    <p className="text-muted-foreground text-xs tracking-wide">
-                                        Kuriftu Resort intelligence
+                                    <p className="text-muted-foreground text-xs leading-snug">
+                                        Kuriftu — guest & operations overview
                                     </p>
                                 </SheetHeader>
                                 <nav className="mt-6 flex flex-col gap-1">
@@ -98,7 +100,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                         prefetch
                         className="flex shrink-0 items-center gap-2 transition-opacity hover:opacity-90"
                     >
-                        <AppLogo />
+                        <AppLogoIcon /> ARIA
                     </Link>
 
                     <div className="hidden h-full flex-1 items-center lg:flex lg:pl-6">
@@ -161,7 +163,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
 
                 {breadcrumbs.length > 1 && (
                     <div className="border-border/50 border-t bg-muted/20">
-                        <div className="text-muted-foreground mx-auto flex h-11 max-w-[1600px] items-center px-4 text-sm sm:px-6">
+                        <div className="text-muted-foreground mx-auto flex h-11 max-w-6xl items-center px-4 text-sm sm:px-6">
                             <Breadcrumbs breadcrumbs={breadcrumbs} />
                         </div>
                     </div>
