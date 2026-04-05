@@ -168,8 +168,8 @@ final class KitchenBoardPresenter
                     'escalate_to_human',
                     'log_incident',
                 ])
-                    ->orWhereRaw('LOWER(COALESCE(result, "")) LIKE ?', ['%room%'])
-                    ->orWhereRaw('LOWER(COALESCE(result, "")) LIKE ?', ['%kitchen%']);
+                    ->orWhereRaw("LOWER(COALESCE(result, '')) LIKE ?", ['%room%'])
+                    ->orWhereRaw("LOWER(COALESCE(result, '')) LIKE ?", ['%kitchen%']);
 
                 if ($guestIds !== []) {
                     $q->orWhereIn('guest_id', $guestIds);
