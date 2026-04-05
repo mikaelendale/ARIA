@@ -37,12 +37,12 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
         >
             <Head title="Sign in" />
 
-            {showDemo && (
+            {/* {showDemo && ( */}
                 <div className="border-border/50 bg-muted/25 mb-6 rounded-xl border px-4 py-3 text-left">
                     <p className="text-foreground mb-1 text-sm font-medium">Try the app on this computer</p>
                     <p className="text-muted-foreground mb-3 text-xs leading-relaxed">
                         Sample sign-ins for local testing. Use the password:{' '}
-                        <span className="text-foreground font-medium">password</span>
+                        <span className="text-foreground font-medium bg-amber-300">password</span>
                     </p>
                     <ul className="max-h-36 space-y-1.5 overflow-y-auto text-xs">
                         {DEMO_ACCOUNTS.map((row) => (
@@ -56,7 +56,7 @@ export default function Login({ status, canResetPassword, canRegister }: Props) 
                         ))}
                     </ul>
                 </div>
-            )}
+            {/* )} */}
 
             <Form
                 {...store.form()}

@@ -11,15 +11,20 @@ export function OrbDemo({
     small = false,
     /** Kiosk column: no card chrome, smaller orb, no duplicate headings */
     embedded = false,
+    /** Larger orb for the dedicated top band on the guest kiosk */
+    embeddedVariant = 'compact',
 }: {
     small?: boolean;
     embedded?: boolean;
+    embeddedVariant?: 'compact' | 'hero';
 }) {
     const [agent, setAgent] = useState<AgentState>(null);
     const palettes = small ? [ORB_PALETTES[0]!] : ORB_PALETTES;
 
     const orbSize = embedded
-        ? 'h-[min(52vmin,18rem)] w-[min(52vmin,18rem)] max-w-full p-1.5'
+        ? embeddedVariant === 'hero'
+            ? 'h-[min(64vmin,26rem)] w-[min(64vmin,26rem)] max-w-full p-2'
+            : 'h-[min(52vmin,18rem)] w-[min(52vmin,18rem)] max-w-full p-1.5'
         : small
           ? 'h-40 w-40 p-1'
           : 'h-[min(82vmin,32rem)] w-[min(82vmin,32rem)] max-w-[95vw] p-2';

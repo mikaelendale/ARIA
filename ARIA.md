@@ -180,3 +180,40 @@ ARIA closes every one of those gaps. Autonomously. In real time.
 
 *ARIA doesn't wait to be asked. She already handled it.*
 
+---
+
+## **Hermes — named voice agent (implementation)**
+
+* **Hermes** is the dedicated voice-facing agent in the codebase (`HermesAgent`): Twilio voice webhooks and OpenAI Realtime for live audio, with **bilingual Amharic and English** instructions aligned to Kuriftu Resort.
+* Voice uses the **same tool orchestration path** as text ARIA (shared orchestrator and agent tools — not a separate, disconnected brain).
+* Production shape: Twilio Media Streams to a Realtime-capable worker; PHP handles webhooks and session wiring (see `HermesAgent`).
+
+---
+
+## **Public guest voice kiosk (UI)**
+
+* **Route:** `/guest/voice` — public Inertia page (no authenticated app chrome), intended as a **demo / lobby screen** for the voice layer.
+* **Layout:** split view — **3D voice orb** (Idle / Listening / Talking preview states) beside a **tabbed panel** with mock guest surfaces: **Messages** (Hermes-style outbound WhatsApp preview), **Live** (property activity feed), **Today** (time, weather, hours, Wi‑Fi, events at a glance).
+* **Guided tour:** first-visit onboarding explains Hermes, the orb, and the tabs (storage key `aria-guest-kiosk-tour-seen`).
+* **Data:** mock content for demo; footer clarifies demo vs production wiring (orchestrator + Realtime worker).
+
+---
+
+## **Staff app & ops surfaces (feature routes)**
+
+* **Authenticated Inertia app:** Overview (**dashboard**), **Revenue**, **Guests** (list + detail), **Issues / incidents** (list + detail).
+* **Dashboard ARIA chat:** staff can converse with an **Aria chat agent** backed by ops context and tools (`POST api/ops/aria/chat`).
+* **Live ops APIs:** JSON endpoints under `api/ops` for dashboard stats, guests, incidents, and related detail payloads used by the realtime UI.
+* **Scenario triggers:** `POST api/trigger/scenario` to fire demo/automation scenarios from the app.
+* **Kitchen board:** `/kitchen` with board middleware — order display and mark-delivered flow for room service.
+* **Sidebar shortcuts:** **Guest portal** links to `/guest/voice`; **Kitchen** deep-links to the board (with token query pattern as implemented).
+* **Integrations (webhooks):** `POST /webhook/twilio/voice` and `POST /webhook/twilio/whatsapp` for Twilio voice and WhatsApp.
+
+---
+
+## **Agent & tool implementation (codebase)**
+
+* **Orchestrator pattern:** central orchestration plus named agents (e.g. **Hermes** for voice, **Aria**-style chat agent for dashboard, and other domain agents in `app/Ai/Agents`).
+* **Tool registry:** concrete tools mirror the narrative tool belt — WhatsApp, kitchen ping, manager alert, discounts, experiences, pricing, promos, draft replies, escalation, incident logging, and **read-only ops tools** (dashboard summary, queue health, guest/incident lists and detail, agent status, recent actions).
+* **Observability:** agent actions can be recorded for audit and UI surfaces that consume “recent actions” style data.
+

@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, LineChart, Presentation, ShieldAlert, Users, Video } from 'lucide-react';
+import { Activity, LayoutGrid, MessageSquare, LineChart, Presentation, ShieldAlert, Users, Video, User } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -15,7 +15,20 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard, revenue } from '@/routes';
 import type { NavItem } from '@/types';
-
+import { NavSub } from '@/components/nav-sub';
+import { Knife } from '@phosphor-icons/react';
+const subNavItems: NavItem[] = [
+    {
+        title: 'Guest portal',
+        href: '/guest/voice',
+        icon: User,
+    },
+    {
+        title: 'Kitchen',
+        href: '/kitchen?token=1234567890',
+        icon: Knife,
+    }
+];
 const mainNavItems: NavItem[] = [
     {
         title: 'Overview',
@@ -72,6 +85,7 @@ export function AppSidebar() {
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />
+                <NavSub items={subNavItems} />
             </SidebarContent>
 
             <SidebarFooter>

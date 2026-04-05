@@ -1,27 +1,43 @@
 import { Head } from '@inertiajs/react';
 import { GuestKioskLayout } from '@/components/guest/guest-kiosk-layout';
+import { GuestKioskTourProvider, GuestKioskTourTrigger } from '@/components/guest/guest-tour';
+import { HERMES } from '@/components/guest/hermes-brand';
 
 /**
- * Public kiosk-style page for guests: no app chrome — WhatsApp mock, activity, voice orb, at a glance.
+ * Public Hermes kiosk: voice orb (Hermes) + tabbed guest surfaces.
  */
 export default function GuestVoice() {
     return (
         <>
-            <Head title="Guest concierge" />
-            <div className="bg-background text-foreground flex min-h-dvh flex-col">
-                <main className="flex flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
-                    <p className="text-muted-foreground mb-6 text-center text-xs font-medium uppercase tracking-[0.35em]">
-                        Kuriftu ARIA
-                    </p>
-                    <div className="mx-auto w-full max-w-5xl flex-1">
+            <Head title={HERMES.pageTitle} />
+            <GuestKioskTourProvider>
+                <div className="bg-background text-foreground flex min-h-dvh flex-col">
+                    <header
+                        data-tour="guest-intro"
+                        className="border-border grid shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-2 border-b px-3 py-3 sm:px-4"
+                    >
+                        <div aria-hidden className="min-w-0" />
+                        <div className="text-foreground min-w-0 text-center">
+                            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-[0.28em]">
+                                Kuriftu ARIA
+                            </p>
+                            <p className="text-primary mt-0.5 text-sm font-semibold tracking-tight">{HERMES.fullLabel}</p>
+                            <p className="text-muted-foreground mt-0.5 hidden text-[11px] leading-snug sm:block">
+                                {HERMES.stackLine}
+                            </p>
+                        </div>
+                        <div className="flex min-w-0 justify-end">
+                            <GuestKioskTourTrigger />
+                        </div>
+                    </header>
+                    <main className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
                         <GuestKioskLayout />
-                    </div>
-                    <p className="text-muted-foreground mx-auto mt-10 max-w-lg text-center text-sm leading-relaxed">
-                        Demo display — WhatsApp and activity feeds are illustrative. Voice orb is interactive; speak when
-                        your host enables listening.
-                    </p>
-                </main>
-            </div>
+                    </main>
+                    <footer className="text-muted-foreground shrink-0 border-t border-border px-4 py-3 pb-[max(0.625rem,env(safe-area-inset-bottom))] text-center text-[11px] leading-relaxed sm:text-xs">
+                        {HERMES.footerDemo}
+                    </footer>
+                </div>
+            </GuestKioskTourProvider>
         </>
     );
 }

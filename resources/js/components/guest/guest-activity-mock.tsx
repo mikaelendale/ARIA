@@ -16,16 +16,29 @@ function ActivityIcon({ kind }: { kind: MockActivityItem['kind'] }) {
     }
 }
 
-export function GuestActivityMock({ className }: { className?: string }) {
+export function GuestActivityMock({
+    className,
+    scrollRegionClassName,
+}: {
+    className?: string;
+    scrollRegionClassName?: string;
+}) {
     return (
         <div className={cn('flex min-h-0 min-w-0 flex-1 flex-col', className)}>
             <div className="mb-3 shrink-0">
                 <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-[0.2em]">Live</p>
                 <h2 className="text-foreground mt-1 text-sm font-semibold text-balance">What’s happening</h2>
-                <p className="text-muted-foreground mt-0.5 text-xs">Orders, housekeeping, and requests (demo).</p>
+                <p className="text-muted-foreground mt-0.5 text-xs">
+                    What Hermes and ops see — orders, housekeeping, transport (demo feed). Scroll for more.
+                </p>
             </div>
             <ul
-                className="border-border flex min-h-0 flex-1 flex-col gap-0 overflow-y-auto overscroll-y-contain rounded-xl border"
+                className={cn(
+                    'border-border flex flex-col gap-0 rounded-xl border [-webkit-overflow-scrolling:touch]',
+                    scrollRegionClassName
+                        ? cn('shrink-0 overflow-y-auto overscroll-y-contain', scrollRegionClassName)
+                        : 'min-h-0 flex-1 overflow-y-auto overscroll-y-contain',
+                )}
                 aria-label="Mock activity feed"
             >
                 {MOCK_ACTIVITY_ITEMS.map((item, i) => (
