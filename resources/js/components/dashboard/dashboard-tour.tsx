@@ -1,11 +1,12 @@
 import '@reactour/tour/dist/index.css';
 
-import { Button } from '@/components/ui/button';
-import type { DashboardVisibility } from '@/lib/aria-roles';
-import { TourProvider, useTour, type StepType } from '@reactour/tour';
+import { TourProvider, useTour  } from '@reactour/tour';
+import type {StepType} from '@reactour/tour';
 import { Map } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useEffect, useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import type { DashboardVisibility } from '@/lib/aria-roles';
 
 export const DASHBOARD_TOUR_STORAGE_KEY = 'aria-dashboard-tour-seen';
 
@@ -75,7 +76,7 @@ function buildSteps(vis: DashboardVisibility, hasQueueSnapshot: boolean): StepTy
                 <div className="space-y-2 text-sm leading-relaxed">
                     <p className="font-semibold text-foreground">Jump to common tasks</p>
                     <p className="text-muted-foreground">
-                        Open money, guest list, or issues in one tap — same places as the top menu.
+                        Open money, guest list, or issues in one tap — same places as the sidebar.
                     </p>
                 </div>
             ),
@@ -113,7 +114,8 @@ function buildSteps(vis: DashboardVisibility, hasQueueSnapshot: boolean): StepTy
             <div className="space-y-2 text-sm leading-relaxed">
                 <p className="font-semibold text-foreground">Ask anything</p>
                 <p className="text-muted-foreground">
-                    Type a question at the bottom anytime. The overview stays here when you are done chatting.
+                    Tap <span className="text-foreground font-medium">Show ask bar</span> when it is tucked away, type
+                    here, or open full chat. Hide the bar when you want the page clear.
                 </p>
             </div>
         ),
@@ -147,12 +149,12 @@ export function DashboardTourProvider({ children, vis, hasQueueSnapshot }: Provi
             styles={{
                 popover: (base) => ({
                     ...base,
-                    borderRadius: 12,
+                    borderRadius: 6,
                     maxWidth: 320,
                 }),
                 maskArea: (base) => ({
                     ...base,
-                    rx: 12,
+                    rx: 6,
                 }),
                 badge: (base) => ({
                     ...base,
@@ -161,6 +163,7 @@ export function DashboardTourProvider({ children, vis, hasQueueSnapshot }: Provi
             }}
             nextButton={({ currentStep, stepsLength, setCurrentStep, setIsOpen }) => {
                 const last = currentStep === stepsLength - 1;
+
                 return (
                     <Button
                         type="button"
@@ -229,7 +232,7 @@ export function DashboardTourTrigger() {
             type="button"
             variant="outline"
             size="sm"
-            className="h-8 gap-1.5 rounded-full border-border/70 bg-background/80 text-xs font-medium shadow-sm backdrop-blur-sm"
+            className="h-8 gap-1.5 rounded-sm border-border bg-background text-xs font-medium shadow-none"
             onClick={() => setIsOpen(true)}
         >
             <Map className="size-3.5 opacity-80" aria-hidden />

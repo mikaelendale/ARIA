@@ -138,7 +138,7 @@ function agentMix(actions: ActionFeedItem[]): { name: string; count: number }[] 
 
 function ChartTooltipBox({ label, value, detail }: { label: string; value: ReactNode; detail?: string }) {
     return (
-        <div className="border-border bg-popover text-popover-foreground rounded-md border px-2.5 py-2 text-xs shadow-sm">
+        <div className="border-border bg-popover text-popover-foreground rounded-sm border px-2.5 py-2 text-xs shadow-none">
             <p className="text-muted-foreground font-medium">{label}</p>
             {detail ? <p className="text-muted-foreground mt-0.5 text-[10px] leading-snug">{detail}</p> : null}
             <p className="text-foreground mt-1 font-semibold tabular-nums">{value}</p>
@@ -274,24 +274,21 @@ export function DashboardOverview({
     ];
 
     return (
-        <div className="space-y-3">
-            <div
-                data-tour="dashboard-welcome"
-                className="rounded-xl border border-border/50 bg-muted/20 p-3 shadow-sm sm:p-4"
-            >
-                <div className="flex flex-col gap-2.5 lg:flex-row lg:items-end lg:justify-between">
-                    <div className="max-w-2xl space-y-1.5">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="bg-background text-foreground inline-flex items-center gap-1 rounded-full border border-border/60 px-2 py-0.5 text-[10px] font-semibold tracking-[0.18em] uppercase">
-                                <CalendarDays className="text-foreground/70 size-3.5 stroke-[1.75]" aria-hidden />
+        <div className="space-y-6">
+            <div data-tour="dashboard-welcome" className="border-border bg-card border p-4 sm:p-5">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                    <div className="max-w-2xl space-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="bg-muted/50 text-foreground inline-flex items-center gap-1 rounded-sm border border-border px-2 py-0.5 text-[10px] font-semibold tracking-[0.14em] uppercase">
+                                <CalendarDays className="text-muted-foreground size-3.5 stroke-[1.75]" aria-hidden />
                                 {hero.kicker}
                             </span>
-                            <span className="text-muted-foreground rounded-full border border-border/50 bg-background/80 px-2 py-0.5 text-[11px]">
+                            <span className="text-muted-foreground rounded-sm border border-border bg-background px-2 py-0.5 text-[11px]">
                                 {roleBadge}
                             </span>
                             {showLiveHint ? (
                                 <span className="text-muted-foreground inline-flex items-center gap-1.5 text-[11px]">
-                                    <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
+                                    <span className="bg-primary size-1.5 shrink-0 rounded-sm" aria-hidden />
                                     Live
                                 </span>
                             ) : null}
@@ -299,35 +296,35 @@ export function DashboardOverview({
                         </div>
                         <h1 className="text-foreground text-xl font-semibold tracking-tight sm:text-2xl">{hero.title}</h1>
                         <p className="text-muted-foreground max-w-xl text-[13px] leading-snug">{hero.body}</p>
-                        <div data-tour="dashboard-shortcuts" className="flex flex-wrap gap-1 pt-0.5">
+                        <div data-tour="dashboard-shortcuts" className="flex flex-wrap gap-1.5 pt-0.5">
                             <Link
                                 href={revenue()}
                                 prefetch
-                                className="bg-background text-foreground hover:bg-muted/45 inline-flex items-center gap-1 rounded-full border border-border/60 px-2.5 py-1 text-[13px] font-medium transition-colors"
+                                className="bg-background text-foreground inline-flex items-center gap-1 rounded-sm border border-border px-2.5 py-1 text-[13px] font-medium"
                             >
-                                <Wallet className="text-foreground/70 size-3.5 stroke-[1.75]" aria-hidden />
+                                <Wallet className="text-muted-foreground size-3.5 stroke-[1.75]" aria-hidden />
                                 Revenue
-                                <ChevronRight className="text-foreground/45 size-3 stroke-2" aria-hidden />
+                                <ChevronRight className="text-muted-foreground size-3 stroke-2" aria-hidden />
                             </Link>
                             <Link
                                 href="/guests"
                                 prefetch
-                                className="text-foreground hover:bg-muted/35 inline-flex items-center gap-1 rounded-full border border-transparent px-2.5 py-1 text-[13px] font-medium transition-colors"
+                                className="text-foreground inline-flex items-center gap-1 rounded-sm border border-transparent px-2.5 py-1 text-[13px] font-medium underline-offset-4 hover:underline"
                             >
-                                <ContactRound className="text-foreground/70 size-3.5 stroke-[1.75]" aria-hidden />
+                                <ContactRound className="text-muted-foreground size-3.5 stroke-[1.75]" aria-hidden />
                                 Guests
                             </Link>
                             <Link
                                 href="/incidents"
                                 prefetch
-                                className="text-foreground hover:bg-muted/35 inline-flex items-center gap-1 rounded-full border border-transparent px-2.5 py-1 text-[13px] font-medium transition-colors"
+                                className="text-foreground inline-flex items-center gap-1 rounded-sm border border-transparent px-2.5 py-1 text-[13px] font-medium underline-offset-4 hover:underline"
                             >
-                                <ClipboardList className="text-foreground/70 size-3.5 stroke-[1.75]" aria-hidden />
+                                <ClipboardList className="text-muted-foreground size-3.5 stroke-[1.75]" aria-hidden />
                                 Issues
                             </Link>
                         </div>
                     </div>
-                    <div className="border-border/50 bg-card flex shrink-0 flex-col gap-0.5 rounded-lg border px-2.5 py-2 sm:min-w-[188px]">
+                    <div className="border-border bg-muted/30 flex shrink-0 flex-col gap-0.5 rounded-sm border px-3 py-2 sm:min-w-[188px]">
                         <p className="text-muted-foreground flex items-center gap-1.5 text-[11px] font-medium">
                             <Gauge className="text-foreground/70 size-3.5 stroke-[1.75]" aria-hidden />
                             Departure risk (avg.)
@@ -341,8 +338,8 @@ export function DashboardOverview({
             </div>
 
             <div data-tour="dashboard-glance">
-                <p className="text-muted-foreground mb-1.5 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.2em] uppercase">
-                    <LayoutGrid className="text-foreground/65 size-3.5 stroke-[1.75]" aria-hidden />
+                <p className="text-muted-foreground mb-2 flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.16em] uppercase">
+                    <LayoutGrid className="text-muted-foreground size-3.5 stroke-[1.75]" aria-hidden />
                     At a glance
                 </p>
                 <div
@@ -351,18 +348,14 @@ export function DashboardOverview({
                         kpis.length >= 5 ? 'xl:grid-cols-5' : 'xl:grid-cols-4',
                     )}
                 >
-                    {kpis.map((k, idx) => (
-                        <div
-                            key={k.label}
-                            className="aria-animate-in group border-border/50 bg-card/90 rounded-lg border p-2.5 shadow-sm transition-colors hover:border-border/80"
-                            style={{ animationDelay: `${idx * 40}ms` }}
-                        >
+                    {kpis.map((k) => (
+                        <div key={k.label} className="border-border bg-card rounded-sm border p-2.5 shadow-none">
                             <p className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
                                 {k.label}
                             </p>
                             <p className="text-muted-foreground mt-0.5 text-[10px] leading-snug">{k.hint}</p>
                             <p className="mt-1.5 text-xl font-semibold tabular-nums tracking-tight">{k.value}</p>
-                            <div className="mt-2 h-9 opacity-95 transition-opacity group-hover:opacity-100">
+                            <div className="mt-2 h-9">
                                 <ChartContainer className="h-9 [&>div]:h-full">
                                     <AreaChart data={k.spark} margin={{ top: 2, right: 2, left: 0, bottom: 0 }}>
                                         <Tooltip
@@ -402,8 +395,8 @@ export function DashboardOverview({
                 </p>
             </div>
 
-            <div className="grid gap-2.5 lg:grid-cols-2">
-                <div className="border-border/50 bg-card/50 rounded-lg border p-2.5 shadow-sm">
+            <div className="grid gap-3 lg:grid-cols-2">
+                <div className="border-border bg-card rounded-sm border p-3 shadow-none">
                     <div className="mb-1.5 flex items-start justify-between gap-2">
                         <div>
                             <p className="text-foreground flex items-center gap-1.5 text-sm font-semibold">
@@ -446,7 +439,7 @@ export function DashboardOverview({
                     </ChartContainer>
                 </div>
 
-                <div className="border-border/50 bg-card/50 rounded-lg border p-2.5 shadow-sm">
+                <div className="border-border bg-card rounded-sm border p-3 shadow-none">
                     <div className="mb-1.5">
                         <p className="text-foreground flex items-center gap-1.5 text-sm font-semibold">
                             <Hotel className="text-foreground/65 size-3.5 shrink-0 stroke-[1.75]" aria-hidden />
@@ -456,7 +449,7 @@ export function DashboardOverview({
                     </div>
                     <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center sm:gap-4">
                         {occData.length === 0 ? (
-                            <div className="text-muted-foreground flex min-h-[168px] w-full max-w-[180px] items-center justify-center rounded-lg border border-dashed p-3 text-center text-[11px]">
+                            <div className="text-muted-foreground flex min-h-[168px] w-full max-w-[180px] items-center justify-center rounded-sm border border-dashed border-border p-3 text-center text-[11px]">
                                 No room data yet.
                             </div>
                         ) : (
@@ -501,8 +494,8 @@ export function DashboardOverview({
                 </div>
             </div>
 
-            <div className="grid gap-2.5 lg:grid-cols-2">
-                <div className="border-border/50 bg-card/50 rounded-lg border p-2.5 shadow-sm">
+            <div className="grid gap-3 lg:grid-cols-2">
+                <div className="border-border bg-card rounded-sm border p-3 shadow-none">
                     <p className="text-foreground flex items-center gap-1.5 text-sm font-semibold">
                         <Inbox className="text-foreground/65 size-3.5 shrink-0 stroke-[1.75]" aria-hidden />
                         Queue backlog
@@ -511,7 +504,7 @@ export function DashboardOverview({
                         Pending jobs per lane (empty is healthy).
                     </p>
                     {queueRows.length === 0 ? (
-                        <div className="text-muted-foreground bg-muted/20 flex min-h-[148px] items-center justify-center rounded-lg border border-dashed p-3 text-center text-xs">
+                        <div className="text-muted-foreground bg-muted/20 flex min-h-[148px] items-center justify-center rounded-sm border border-dashed border-border p-3 text-center text-xs">
                             All clear — or running in sync mode.
                         </div>
                     ) : (
@@ -543,20 +536,20 @@ export function DashboardOverview({
                                         ) : null
                                     }
                                 />
-                                <Bar dataKey="pending" radius={[0, 4, 4, 0]} fill="var(--chart-3)" barSize={16} />
+                                <Bar dataKey="pending" radius={[0, 2, 2, 0]} fill="var(--chart-3)" barSize={16} />
                             </BarChart>
                         </ChartContainer>
                     )}
                 </div>
 
-                <div className="border-border/50 bg-card/50 rounded-lg border p-2.5 shadow-sm">
+                <div className="border-border bg-card rounded-sm border p-3 shadow-none">
                     <p className="text-foreground flex items-center gap-1.5 text-sm font-semibold">
                         <Fingerprint className="text-foreground/65 size-3.5 shrink-0 stroke-[1.75]" aria-hidden />
                         Activity by agent
                     </p>
                     <p className="text-muted-foreground mb-1.5 mt-0.5 text-[11px] leading-snug">Steps in your current feed sample.</p>
                     {agents.length === 0 ? (
-                        <div className="text-muted-foreground bg-muted/20 flex min-h-[148px] items-center justify-center rounded-lg border border-dashed p-3 text-center text-xs">
+                        <div className="text-muted-foreground bg-muted/20 flex min-h-[148px] items-center justify-center rounded-sm border border-dashed border-border p-3 text-center text-xs">
                             No steps in this sample yet.
                         </div>
                     ) : (
@@ -585,7 +578,7 @@ export function DashboardOverview({
                                         ) : null
                                     }
                                 />
-                                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                                <Bar dataKey="count" radius={[2, 2, 0, 0]}>
                                     {agents.map((_, i) => (
                                         <Cell key={agents[i]!.name} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                                     ))}

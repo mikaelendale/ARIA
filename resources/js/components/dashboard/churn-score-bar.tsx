@@ -32,9 +32,8 @@ export function ChurnScoreBar({ score, label, className }: ChurnScoreBarProps) {
                     {Math.round(clamped)}
                 </span>
             </div>
-            <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
-                <div
-                    className={cn('h-full rounded-full transition-all duration-300', churnBarTone(clamped))}
+            <div className="bg-muted h-1.5 w-full overflow-hidden rounded-sm">
+                <div className={cn('h-full rounded-sm', churnBarTone(clamped))}
                     style={{ width: `${clamped}%` }}
                 />
             </div>

@@ -35,7 +35,7 @@ export function LiveCounter() {
     }, [pulseRevenueToday]);
 
     return (
-        <Card className="border-border/50 bg-muted/15 rounded-lg border p-3 shadow-none">
+        <Card className="border-border bg-muted/20 rounded-sm border p-3 shadow-none">
             <div className="text-muted-foreground mb-0.5 text-xs font-semibold uppercase tracking-[0.18em]">
                 Extra revenue today (pricing)
             </div>

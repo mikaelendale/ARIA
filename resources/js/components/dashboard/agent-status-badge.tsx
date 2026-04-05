@@ -1,6 +1,6 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { formatRelativeTime, formatTimeAgo } from '@/lib/formatters';
 import { friendlyAgentName } from '@/lib/aria-agent-copy';
+import { formatRelativeTime, formatTimeAgo } from '@/lib/formatters';
 import { cn } from '@/lib/utils';
 import type { AgentMeta } from '@/types/ops';
 
@@ -36,7 +36,7 @@ export function AgentStatusBadge({ agent, className }: AgentStatusBadgeProps) {
                     type="button"
                     className={cn(
                         rowClass,
-                        'hover:bg-muted/60 -mx-1 max-w-full rounded-md px-1 text-left transition-colors',
+                        '-mx-1 max-w-full rounded-sm px-1 text-left',
                         className,
                     )}
                 >

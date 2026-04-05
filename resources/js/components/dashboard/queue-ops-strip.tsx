@@ -42,11 +42,10 @@ export function QueueOpsStrip({ snapshot }: { snapshot: QueueSnapshot | null | u
     return (
         <div
             className={cn(
-                'aria-animate-in overflow-hidden rounded-lg border px-2.5 py-2',
-                isSync ? 'border-amber-500/30 bg-amber-500/6' : 'border-border/50 bg-muted/10',
-                hasProblems && !isSync ? 'border-destructive/35 bg-destructive/4' : null,
+                'overflow-hidden rounded-sm border px-3 py-2',
+                isSync ? 'border-amber-500/40 bg-amber-500/8 dark:bg-amber-500/10' : 'border-border bg-muted/20',
+                hasProblems && !isSync ? 'border-destructive/40 bg-destructive/8' : null,
             )}
-            style={{ animationDelay: '30ms' }}
         >
             <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0 flex-1 space-y-0.5">
@@ -57,14 +56,18 @@ export function QueueOpsStrip({ snapshot }: { snapshot: QueueSnapshot | null | u
                     <p className="text-muted-foreground pl-[22px] text-[11px] leading-snug">{subline}</p>
                 </div>
                 {!isSync && (hasWork || hasProblems) ? (
-                    <span className="aria-live-dot size-2 shrink-0 rounded-full bg-emerald-500" aria-hidden />
+                    <span
+                        className="bg-primary size-2 shrink-0 rounded-sm"
+                        aria-hidden
+                        title="Work in queue"
+                    />
                 ) : null}
             </div>
 
             {!isSync ? (
                 <details className="group/details border-border/40 mt-2 border-t pt-1.5">
-                    <summary className="text-muted-foreground hover:text-foreground flex cursor-pointer list-none items-center gap-1 text-xs font-medium transition-colors [&::-webkit-details-marker]:hidden">
-                        <ChevronDown className="size-3.5 shrink-0 transition-transform group-open/details:rotate-180" />
+                    <summary className="text-muted-foreground flex cursor-pointer list-none items-center gap-1 text-xs font-medium [&::-webkit-details-marker]:hidden">
+                        <ChevronDown className="size-3.5 shrink-0 group-open/details:rotate-180" />
                         Details for IT / developers
                     </summary>
                     <div className="text-muted-foreground mt-2 space-y-2 text-[11px] leading-relaxed">
