@@ -1,5 +1,5 @@
 import { Head, usePage } from '@inertiajs/react';
-import { ChevronDown, ChevronUp, Gauge, MessagesSquare } from 'lucide-react';
+import { Gauge, MessagesSquare } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useAgentStore } from '@/app/store/useAgentStore';
@@ -74,8 +74,6 @@ export default function Dashboard() {
     const [chatLoading, setChatLoading] = useState(false);
     const [chatMessages, setChatMessages] = useState<AriaChatMessage[]>([]);
     const [ariaConversationId, setAriaConversationId] = useState<string | null>(null);
-    /** Collapsed by default so the fixed composer does not cover the dashboard. */
-    const [composerExpanded, setComposerExpanded] = useState(false);
 
     const sendAriaChat = useCallback(
         async (message: string, files?: File[]) => {
@@ -98,7 +96,6 @@ export default function Dashboard() {
                 { id: assistantId, role: 'assistant', content: '' },
             ]);
             setChatUiOpen(true);
-            setComposerExpanded(true);
             setChatLoading(true);
 
             try {
@@ -184,8 +181,6 @@ export default function Dashboard() {
     const showAsideRail =
         vis.showDemoPanel || vis.showLiveFeed || vis.showSignalsColumn;
 
-    const composerOpen = composerExpanded || chatUiOpen;
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Overview — Kuriftu" />
@@ -193,7 +188,7 @@ export default function Dashboard() {
                 <div
                     className={cn(
                         'flex min-h-0 flex-1 flex-col gap-6 px-4 py-4 md:px-6 md:py-5',
-                        composerOpen ? 'pb-[min(46vh,18rem)] sm:pb-[min(42vh,17rem)]' : 'pb-16 sm:pb-18',
+                        chatUiOpen ? 'h-full min-h-0 overflow-hidden gap-0 py-0 md:pb-0' : 'pb-8',
                     )}
                 >
                     {!chatUiOpen ? (
@@ -210,7 +205,7 @@ export default function Dashboard() {
                                     showAsideRail && 'xl:grid-cols-[minmax(0,1.5fr)_32rem] xl:items-start xl:gap-10',
                                 )}
                             >
-                                <div className="min-w-0 space-y-6">
+                                <div className="min-w-0 space-y-6" data-tour="dashboard-main">
                                     <DashboardOverview
                                         hero={hero}
                                         roleBadge={roleLabel(role)}
@@ -222,7 +217,11 @@ export default function Dashboard() {
                                     />
 
                                     {!vis.showSignalsColumn && vis.showChurn ? (
-                                        <section className="space-y-2" aria-labelledby="dash-churn-heading">
+                                        <section
+                                            className="space-y-2"
+                                            aria-labelledby="dash-churn-heading"
+                                            data-tour="dashboard-churn"
+                                        >
                                             <div className="flex items-center gap-2 border-b border-border pb-2">
                                                 <Gauge
                                                     className="text-muted-foreground size-3.5 shrink-0 stroke-[1.75]"
@@ -238,10 +237,25 @@ export default function Dashboard() {
                                             <ChurnBoard score={churnScore} />
                                         </section>
                                     ) : null}
+
+                                    <div className="flex justify-center pt-1">
+                                        <Button
+                                            data-tour="dashboard-ask"
+                                            type="button"
+                                            variant="secondary"
+                                            size="default"
+                                            className="gap-2 border border-border shadow-none sm:min-w-48"
+                                            onClick={() => setChatUiOpen(true)}
+                                        >
+                                            <MessagesSquare className="size-4 stroke-[1.75]" aria-hidden />
+                                            Open chat
+                                        </Button>
+                                    </div>
                                 </div>
 
                                 {showAsideRail ? (
                                     <aside
+                                        data-tour="dashboard-rail"
                                         className={cn(
                                             'flex min-w-0 flex-col gap-5',
                                             'xl:sticky xl:top-0 xl:pt-0.5',
@@ -284,79 +298,23 @@ export default function Dashboard() {
                             </div>
                         </>
                     ) : (
-                        <div className="flex min-h-[min(72vh,calc(100dvh-10rem))] flex-1 flex-col overflow-hidden">
-                            <AriaChatPanel
-                                messages={chatMessages}
-                                onBack={() => setChatUiOpen(false)}
-                                emptyHint="Type below to reach ARIA. The overview stays one tap away."
-                            />
-                        </div>
-                    )}
-                </div>
-
-                <div
-                    data-tour="dashboard-ask"
-                    className="border-border fixed inset-x-0 bottom-0 max-w-3xl mx-auto z-50 3 bg-transparent"
-                >
-                    {!composerOpen ? (
-                        <div className="mx-auto flex max-w-3xl items-center justify-center gap-2 px-3 py-2 sm:px-4">
-                            <Button
-                                type="button"
-                                variant="secondary"
-                                size="sm"
-                                className="h-9 flex-1 border border-border shadow-none sm:flex-none sm:px-8"
-                                onClick={() => setComposerExpanded(true)}
-                            >
-                                <ChevronUp className="mr-2 size-4 opacity-70" aria-hidden />
-                                Show ask bar
-                            </Button>
-                            {/* {!chatUiOpen ? (
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-9 border-border shadow-none"
-                                    onClick={() => {
-                                        setComposerExpanded(true);
-                                        setChatUiOpen(true);
-                                    }}
-                                >
-                                    <MessagesSquare className="mr-1.5 size-4 stroke-[1.75]" aria-hidden />
-                                    Open chat
-                                </Button>
-                            ) : null} */}
-                        </div>
-                    ) : (
-                        <div className="mx-auto flex max-w-3xl flex-col gap-2 px-3 py-3 sm:px-4">
-                            {!chatUiOpen ? (
-                                <div className="flex items-center justify-between gap-2">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-8 shrink-0 border-border shadow-none"
-                                        onClick={() => setChatUiOpen(true)}
-                                    >
-                                        <MessagesSquare className="mr-1.5 size-4 stroke-[1.75]" aria-hidden />
-                                        Chat with ARIA
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-muted-foreground h-8 shrink-0 gap-1 px-2"
-                                        onClick={() => setComposerExpanded(false)}
-                                    >
-                                        <ChevronDown className="size-4" aria-hidden />
-                                        Hide
-                                    </Button>
+                        <div className="mx-auto flex h-full min-h-0 w-full max-w-2xl flex-1 flex-col overflow-hidden">
+                            <div className="bg-background/95 supports-backdrop-filter:bg-background/80 flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-sm  shadow-none">
+                                <AriaChatPanel
+                                    messages={chatMessages}
+                                    isGenerating={chatLoading}
+                                    onBack={() => setChatUiOpen(false)}
+                                    emptyHint="Messages stream in as ARIA replies. Ask about guests, rooms, or today’s numbers."
+                                    className="min-h-0 flex-1"
+                                />
+                                <div className=" shrink-0 px-1 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+                                    <PromptInputBox
+                                        onSend={(msg, files) => void sendAriaChat(msg, files)}
+                                        isLoading={chatLoading}
+                                        copy={{ defaultPlaceholder: 'Ask anything about guests, rooms, or today…' }}
+                                    />
                                 </div>
-                            ) : null}
-                            <PromptInputBox
-                                onSend={(msg, files) => void sendAriaChat(msg, files)}
-                                isLoading={chatLoading}
-                                copy={{ defaultPlaceholder: 'Ask anything about guests, rooms, or today…' }}
-                            />
+                            </div>
                         </div>
                     )}
                 </div>

@@ -133,7 +133,7 @@
         oklch(0.922 0 0);
     --sidebar-ring:
         oklch(0.708 0 0);
-    /* @reactour/mask — dimmed area uses this as SVG fill (currentColor) */
+    /* Guided tour spotlight shadow (see components/ui/tour.tsx) */
     --tour-overlay: oklch(0.22 0.03 260 / 0.74);
 }
 
