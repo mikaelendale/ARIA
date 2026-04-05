@@ -16,5 +16,6 @@ export const HERMES = {
         'Demo surfaces: Hermes routes voice through the same ARIA orchestrator as text. Realtime audio runs in a dedicated worker with Twilio Media Streams (see HermesAgent).',
     /** WhatsApp panel header */
     messagesTitle: 'Outbound from Hermes',
-    messagesSubtitle: 'WhatsApp-style preview — production pipes Twilio / BSP.',
+    messagesSubtitle:
+        'Same send_whatsapp tool as ARIA — live send when GUEST_KIOSK_WHATSAPP_GUEST_ID is set; otherwise preview only.',
 } as const;

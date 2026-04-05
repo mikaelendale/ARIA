@@ -13,7 +13,11 @@ return [
     |
     */
 
-    'default' => env('QUEUE_CONNECTION', 'redis'),
+    /*
+    | Default to database so deploys without Redis (e.g. Laravel Cloud without a Redis
+    | add-on) still work; use redis when QUEUE_CONNECTION=redis and REDIS_* are set.
+    */
+    'default' => env('QUEUE_CONNECTION', 'database'),
 
     /*
     |--------------------------------------------------------------------------

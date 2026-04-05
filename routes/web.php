@@ -3,6 +3,8 @@
 use App\Http\Controllers\AriaDashboardChatController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GuestController;
+use App\Http\Controllers\GuestKioskWhatsappController;
+use App\Http\Controllers\GuestVoiceController;
 use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\KitchenBoardController;
 use App\Http\Controllers\RevenueController;
@@ -21,8 +23,11 @@ Route::inertia('/', 'welcome', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
-/** Public guest-facing screen (no app chrome): voice agent animation only */
-Route::inertia('/guest/voice', 'guest-voice')->name('guest.voice');
+/** Public guest-facing Hermes kiosk (no app chrome): voice orb + WhatsApp send channel when configured */
+Route::get('/guest/voice', GuestVoiceController::class)->name('guest.voice');
+Route::post('/guest/whatsapp/send', GuestKioskWhatsappController::class)
+    ->middleware('throttle:10,1')
+    ->name('guest.whatsapp.send');
 
 Route::middleware(['kitchen.board'])->group(function () {
     Route::get('/kitchen', [KitchenBoardController::class, 'index'])->name('kitchen.index');

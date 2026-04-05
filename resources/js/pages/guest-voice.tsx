@@ -3,10 +3,17 @@ import { GuestKioskLayout } from '@/components/guest/guest-kiosk-layout';
 import { GuestKioskTourProvider, GuestKioskTourTrigger } from '@/components/guest/guest-tour';
 import { HERMES } from '@/components/guest/hermes-brand';
 
+export type GuestVoicePageProps = {
+    whatsappKiosk: {
+        sendEnabled: boolean;
+        guestLabel: string | null;
+    };
+};
+
 /**
  * Public Hermes kiosk: voice orb (Hermes) + tabbed guest surfaces.
  */
-export default function GuestVoice() {
+export default function GuestVoice({ whatsappKiosk }: GuestVoicePageProps) {
     return (
         <>
             <Head title={HERMES.pageTitle} />
@@ -31,7 +38,7 @@ export default function GuestVoice() {
                         </div>
                     </header>
                     <main className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
-                        <GuestKioskLayout />
+                        <GuestKioskLayout whatsappKiosk={whatsappKiosk} />
                     </main>
                     <footer className="text-muted-foreground shrink-0 border-t border-border px-4 py-3 pb-[max(0.625rem,env(safe-area-inset-bottom))] text-center text-[11px] leading-relaxed sm:text-xs">
                         {HERMES.footerDemo}

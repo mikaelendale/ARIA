@@ -1,6 +1,6 @@
 import { GuestActivityMock } from '@/components/guest/guest-activity-mock';
 import { GuestGlanceMock } from '@/components/guest/guest-glance-mock';
-import { GuestWhatsAppMock } from '@/components/guest/guest-whatsapp-mock';
+import { GuestWhatsAppMock, type WhatsappKioskProps } from '@/components/guest/guest-whatsapp-mock';
 import { HERMES } from '@/components/guest/hermes-brand';
 import { OrbDemo } from '@/components/guest/orb-demo';
 import { cn } from '@/lib/utils';
@@ -20,7 +20,7 @@ export const GUEST_TAB_SCROLL_REGION_CLASS = 'h-[min(50vh,420px)] min-h-[200px]'
 /**
  * Equal split (md+): voice orb | tabbed panel. Messages / Live / Today share one fixed-height scroll box each.
  */
-export function GuestKioskLayout() {
+export function GuestKioskLayout({ whatsappKiosk }: { whatsappKiosk: WhatsappKioskProps }) {
     const [tab, setTab] = useState<GuestTab>('whatsapp');
 
     return (
@@ -87,7 +87,10 @@ export function GuestKioskLayout() {
                         className="flex min-h-0 flex-1 flex-col px-4 py-4 sm:px-6 sm:py-5"
                     >
                         <div data-tour="guest-whatsapp" className="flex min-h-0 flex-1 flex-col">
-                            <GuestWhatsAppMock scrollRegionClassName={GUEST_TAB_SCROLL_REGION_CLASS} />
+                            <GuestWhatsAppMock
+                                scrollRegionClassName={GUEST_TAB_SCROLL_REGION_CLASS}
+                                whatsappKiosk={whatsappKiosk}
+                            />
                         </div>
                     </div>
                 ) : null}
