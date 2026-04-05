@@ -5,6 +5,10 @@ import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+    /** Pre-bundle R3F + three so dev cold starts don’t hit stale “Outdated Optimize Dep” / 504 on deps. */
+    optimizeDeps: {
+        include: ['three', '@react-three/fiber', '@react-three/drei'],
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.tsx'],

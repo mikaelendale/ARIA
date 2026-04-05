@@ -21,6 +21,9 @@ Route::inertia('/', 'welcome', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
 
+/** Public guest-facing screen (no app chrome): voice agent animation only */
+Route::inertia('/guest/voice', 'guest-voice')->name('guest.voice');
+
 Route::middleware(['kitchen.board'])->group(function () {
     Route::get('/kitchen', [KitchenBoardController::class, 'index'])->name('kitchen.index');
     Route::post('/kitchen/orders/{room_service_order}/delivered', [KitchenBoardController::class, 'markDelivered'])
