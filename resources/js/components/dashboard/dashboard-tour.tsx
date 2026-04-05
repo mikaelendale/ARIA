@@ -1,12 +1,13 @@
 import '@reactour/tour/dist/index.css';
 
-import { TourProvider, useTour  } from '@reactour/tour';
-import type {StepType} from '@reactour/tour';
+import type { StepType } from '@reactour/tour';
+import { TourProvider, useTour } from '@reactour/tour';
 import { Map } from 'lucide-react';
-import type { ReactNode } from 'react';
-import { useEffect, useMemo } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import { useEffect, useMemo, useSyncExternalStore } from 'react';
 import { Button } from '@/components/ui/button';
 import type { DashboardVisibility } from '@/lib/aria-roles';
+import { cn } from '@/lib/utils';
 
 export const DASHBOARD_TOUR_STORAGE_KEY = 'aria-dashboard-tour-seen';
 
@@ -24,6 +25,21 @@ export function markDashboardTourSeen(): void {
     } catch {
         /* ignore */
     }
+}
+
+function subscribeReducedMotion(callback: () => void): () => void {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    mq.addEventListener('change', callback);
+
+    return () => mq.removeEventListener('change', callback);
+}
+
+function getReducedMotionSnapshot(): boolean {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function getReducedMotionServerSnapshot(): boolean {
+    return false;
 }
 
 function buildSteps(vis: DashboardVisibility, hasQueueSnapshot: boolean): StepType[] {
@@ -132,6 +148,11 @@ type ProviderProps = {
 
 export function DashboardTourProvider({ children, vis, hasQueueSnapshot }: ProviderProps) {
     const steps = useMemo(() => buildSteps(vis, hasQueueSnapshot), [vis, hasQueueSnapshot]);
+    const reduceMotion = useSyncExternalStore(
+        subscribeReducedMotion,
+        getReducedMotionSnapshot,
+        getReducedMotionServerSnapshot,
+    );
 
     return (
         <TourProvider
@@ -147,18 +168,61 @@ export function DashboardTourProvider({ children, vis, hasQueueSnapshot }: Provi
                 markDashboardTourSeen();
             }}
             styles={{
-                popover: (base) => ({
+                maskWrapper: (base) => ({
                     ...base,
-                    borderRadius: 6,
-                    maxWidth: 320,
+                    color: 'var(--tour-overlay)',
+                    opacity: 1,
                 }),
                 maskArea: (base) => ({
                     ...base,
                     rx: 6,
                 }),
+                popover: (base) => ({
+                    ...base,
+                    backgroundColor: 'var(--popover)',
+                    color: 'var(--popover-foreground)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 6,
+                    maxWidth: 320,
+                    padding: '18px 20px',
+                    boxShadow: '0 12px 40px -10px color-mix(in oklch, var(--foreground) 22%, transparent)',
+                }),
                 badge: (base) => ({
                     ...base,
+                    background: 'var(--primary)',
+                    color: 'var(--primary-foreground)',
+                    borderRadius: 6,
                     fontSize: 11,
+                    boxShadow: '0 2px 10px color-mix(in oklch, var(--foreground) 18%, transparent)',
+                }),
+                dot: (base, state) => ({
+                    ...base,
+                    ...(state?.current
+                        ? {
+                              border: '0',
+                              background: 'var(--primary)',
+                              color: 'var(--primary)',
+                          }
+                        : {
+                              border: '1px solid var(--border)',
+                              background: 'none',
+                              color: 'var(--muted-foreground)',
+                          }),
+                }),
+                arrow: (base) => ({
+                    ...base,
+                    color: 'var(--muted-foreground)',
+                }),
+                close: (base) => ({
+                    ...base,
+                    ...({
+                        '--rt-close-btn': 'var(--muted-foreground)',
+                        '--rt-close-btn-disabled': 'var(--muted-foreground)',
+                    } as CSSProperties),
+                }),
+                controls: (base) => ({
+                    ...base,
+                    marginTop: 20,
                 }),
             }}
             nextButton={({ currentStep, stepsLength, setCurrentStep, setIsOpen }) => {
@@ -166,9 +230,10 @@ export function DashboardTourProvider({ children, vis, hasQueueSnapshot }: Provi
 
                 return (
                     <Button
+                        key={`tour-next-${currentStep}`}
                         type="button"
                         size="sm"
-                        className="rounded-md"
+                        className={cn('rounded-md', !reduceMotion && 'aria-tour-cta-pop')}
                         onClick={() => {
                             if (last) {
                                 markDashboardTourSeen();
@@ -184,10 +249,14 @@ export function DashboardTourProvider({ children, vis, hasQueueSnapshot }: Provi
             }}
             prevButton={({ currentStep, setCurrentStep }) => (
                 <Button
+                    key={`tour-prev-${currentStep}`}
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="rounded-md"
+                    className={cn(
+                        'rounded-md',
+                        !reduceMotion && currentStep > 0 && 'aria-tour-cta-pop',
+                    )}
                     disabled={currentStep === 0}
                     onClick={() => setCurrentStep((s) => Math.max(0, s - 1))}
                 >

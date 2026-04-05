@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 import type { TooltipValueType } from "recharts"
@@ -43,11 +41,12 @@ function ChartContainer({
   id,
   className,
   children,
-  config,
+  config = {},
   initialDimension = INITIAL_DIMENSION,
   ...props
 }: React.ComponentProps<"div"> & {
-  config: ChartConfig
+  /** When omitted, no theme CSS variables are injected (inline chart colors still work). */
+  config?: ChartConfig
   children: React.ComponentProps<
     typeof RechartsPrimitive.ResponsiveContainer
   >["children"]
@@ -60,7 +59,7 @@ function ChartContainer({
   const chartId = `chart-${id ?? uniqueId.replace(/:/g, "")}`
 
   return (
-    <ChartContext.Provider value={{ config }}>
+    <ChartContext.Provider value={{ config: config ?? {} }}>
       <div
         data-slot="chart"
         data-chart={chartId}
@@ -82,8 +81,9 @@ function ChartContainer({
 }
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  const colorConfig = Object.entries(config).filter(
-    ([, config]) => config.theme ?? config.color
+  const safeConfig = config ?? {}
+  const colorConfig = Object.entries(safeConfig).filter(
+    ([, item]) => item.theme ?? item.color
   )
 
   if (!colorConfig.length) {
@@ -332,6 +332,10 @@ function getPayloadConfigFromPayload(
   payload: unknown,
   key: string
 ) {
+  if (config == null || typeof config !== "object") {
+    return undefined
+  }
+
   if (typeof payload !== "object" || payload === null) {
     return undefined
   }

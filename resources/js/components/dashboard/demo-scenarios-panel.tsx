@@ -3,13 +3,12 @@ import { ChevronDown, FlaskConical, Loader2, Play } from 'lucide-react';
 import { useCallback, useState  } from 'react';
 import type {ReactNode} from 'react';
 import { Button } from '@/components/ui/button';
+import { runDemoScenarioWithToast  } from '@/lib/demo-scenario-trigger';
+import type {DemoScenarioKey} from '@/lib/demo-scenario-trigger';
 import { cn } from '@/lib/utils';
-import trigger from '@/routes/api/trigger';
-
-type ScenarioKey = 'room_delay' | 'angry_tweet' | 'occupancy_spike' | 'guest_churn';
 
 const SCENARIOS: {
-    id: ScenarioKey;
+    id: DemoScenarioKey;
     title: string;
     plain: string;
     outcome: string;
@@ -40,13 +39,6 @@ const SCENARIOS: {
     },
 ];
 
-const SUCCESS_BLURB: Record<ScenarioKey, string> = {
-    room_delay: 'Started. In a few seconds, scroll “What ARIA did” for kitchen, manager, and guest-message steps.',
-    angry_tweet: 'Started. Check the activity list for reply drafting and recovery outreach.',
-    occupancy_spike: 'Started. Give the pricing and revenue tiles a moment to refresh.',
-    guest_churn: 'Started. Watch the activity list and guest departure risk after a short wait.',
-};
-
 function PanelHeader({ subtitle }: { subtitle: ReactNode }) {
     return (
         <div className="border-border flex items-start gap-2 border-b px-3 py-2.5 sm:px-4">
@@ -61,56 +53,22 @@ function PanelHeader({ subtitle }: { subtitle: ReactNode }) {
 
 export function DemoScenariosPanel() {
     const { csrfToken, demoTriggersEnabled } = usePage().props;
-    const [busy, setBusy] = useState<ScenarioKey | null>(null);
+    const [busy, setBusy] = useState<DemoScenarioKey | null>(null);
     const [lastJson, setLastJson] = useState<string | null>(null);
-    const [lastError, setLastError] = useState<string | null>(null);
-    const [lastOkScenario, setLastOkScenario] = useState<ScenarioKey | null>(null);
 
     const run = useCallback(
-        async (scenario: ScenarioKey) => {
+        async (scenario: DemoScenarioKey) => {
+            const meta = SCENARIOS.find((s) => s.id === scenario);
+            const title = meta?.title ?? scenario;
+
             setBusy(scenario);
-            setLastError(null);
             setLastJson(null);
-            setLastOkScenario(null);
 
             try {
-                const res = await fetch(trigger.scenario.url(), {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Accept: 'application/json',
-                        'X-CSRF-TOKEN': csrfToken,
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    credentials: 'same-origin',
-                    body: JSON.stringify({ scenario }),
-                });
-
-                const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
-
-                if (!res.ok) {
-                    if (res.status === 404) {
-                        setLastError(
-                            'Practice runs are turned off. Ask your technical contact to enable demo mode in settings.',
-                        );
-                    } else {
-                        setLastError(
-                            typeof data.error === 'string'
-                                ? data.error
-                                : 'Something went wrong. Try again or ask for help.',
-                        );
-                    }
-
-                    return;
-                }
-
-                if (data.ok === true && typeof data.scenario === 'string' && data.scenario in SUCCESS_BLURB) {
-                    setLastOkScenario(data.scenario as ScenarioKey);
-                }
-
-                setLastJson(JSON.stringify(data, null, 2));
-            } catch (e) {
-                setLastError(e instanceof Error ? e.message : 'Could not reach the server.');
+                const result = await runDemoScenarioWithToast(scenario, csrfToken ?? '', title);
+                setLastJson(result.rawJson);
+            } catch {
+                /* Outcome already shown via toast */
             } finally {
                 setBusy(null);
             }
@@ -142,7 +100,8 @@ export function DemoScenariosPanel() {
                 subtitle={
                     <p className="text-muted-foreground mt-0.5 text-xs leading-snug">
                         Run a sample, then watch <span className="text-foreground font-medium">What ARIA did</span> below.
-                        Safe for training — no real guest impact.
+                        Safe for training — no real guest impact. Watch the top bar while a run is in progress; a toast
+                        confirms when it finishes.
                     </p>
                 }
             />
@@ -163,7 +122,7 @@ export function DemoScenariosPanel() {
                                 variant="secondary"
                                 className="h-8 gap-1.5 rounded-sm border border-border px-3 text-xs shadow-none"
                                 disabled={busy !== null}
-                                onClick={() => run(s.id)}
+                                onClick={() => void run(s.id)}
                             >
                                 {busy === s.id ? (
                                     <Loader2 className="size-3.5 animate-spin" />
@@ -182,17 +141,6 @@ export function DemoScenariosPanel() {
                     screen are enough for most walkthroughs.
                 </p>
             </div>
-            {lastOkScenario ? (
-                <div className="border-border bg-primary/10 border-t px-3 py-2.5 sm:px-4">
-                    <p className="text-foreground text-sm font-medium">Started successfully</p>
-                    <p className="text-muted-foreground mt-0.5 text-xs leading-relaxed">
-                        {SUCCESS_BLURB[lastOkScenario]}
-                    </p>
-                </div>
-            ) : null}
-            {lastError ? (
-                <div className="border-border text-destructive border-t px-3 py-2 text-sm sm:px-4">{lastError}</div>
-            ) : null}
             {lastJson ? (
                 <details className="border-border border-t">
                     <summary className="text-muted-foreground flex cursor-pointer list-none items-center gap-1 px-3 py-2 text-xs font-medium sm:px-4 [&::-webkit-details-marker]:hidden">

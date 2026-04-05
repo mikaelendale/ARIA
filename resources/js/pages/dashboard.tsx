@@ -1,6 +1,7 @@
 import { Head, usePage } from '@inertiajs/react';
 import { ChevronDown, ChevronUp, Gauge, MessagesSquare } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { useAgentStore } from '@/app/store/useAgentStore';
 import { usePulseRevenueStore } from '@/app/store/usePulseRevenueStore';
 import { PromptInputBox } from '@/components/ai-prompt-box';
@@ -72,7 +73,6 @@ export default function Dashboard() {
     const [chatUiOpen, setChatUiOpen] = useState(false);
     const [chatLoading, setChatLoading] = useState(false);
     const [chatMessages, setChatMessages] = useState<AriaChatMessage[]>([]);
-    const [chatError, setChatError] = useState<string | null>(null);
     const [ariaConversationId, setAriaConversationId] = useState<string | null>(null);
     /** Collapsed by default so the fixed composer does not cover the dashboard. */
     const [composerExpanded, setComposerExpanded] = useState(false);
@@ -100,7 +100,6 @@ export default function Dashboard() {
             setChatUiOpen(true);
             setComposerExpanded(true);
             setChatLoading(true);
-            setChatError(null);
 
             try {
                 const res = await fetch(ARIA_CHAT_URL, {
@@ -142,7 +141,9 @@ export default function Dashboard() {
                 });
             } catch (e) {
                 setChatMessages((prev) => prev.filter((m) => m.id !== assistantId));
-                setChatError(e instanceof Error ? e.message : 'Something went wrong.');
+                toast.error('Message could not be sent', {
+                    description: e instanceof Error ? e.message : 'Something went wrong.',
+                });
             } finally {
                 setChatLoading(false);
             }
@@ -206,7 +207,7 @@ export default function Dashboard() {
                             <div
                                 className={cn(
                                     'grid min-w-0 gap-6',
-                                    showAsideRail && 'xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-start xl:gap-8',
+                                    showAsideRail && 'xl:grid-cols-[minmax(0,1.5fr)_32rem] xl:items-start xl:gap-10',
                                 )}
                             >
                                 <div className="min-w-0 space-y-6">
@@ -309,7 +310,7 @@ export default function Dashboard() {
                                 <ChevronUp className="mr-2 size-4 opacity-70" aria-hidden />
                                 Show ask bar
                             </Button>
-                            {!chatUiOpen ? (
+                            {/* {!chatUiOpen ? (
                                 <Button
                                     type="button"
                                     variant="outline"
@@ -323,7 +324,7 @@ export default function Dashboard() {
                                     <MessagesSquare className="mr-1.5 size-4 stroke-[1.75]" aria-hidden />
                                     Open chat
                                 </Button>
-                            ) : null}
+                            ) : null} */}
                         </div>
                     ) : (
                         <div className="mx-auto flex max-w-3xl flex-col gap-2 px-3 py-3 sm:px-4">
@@ -349,14 +350,6 @@ export default function Dashboard() {
                                         <ChevronDown className="size-4" aria-hidden />
                                         Hide
                                     </Button>
-                                </div>
-                            ) : null}
-                            {chatError ? (
-                                <div
-                                    className="border-destructive/40 bg-destructive/10 text-destructive rounded-sm border px-3 py-2 text-xs shadow-none"
-                                    role="alert"
-                                >
-                                    {chatError}
                                 </div>
                             ) : null}
                             <PromptInputBox

@@ -2,12 +2,11 @@ import { usePage } from '@inertiajs/react';
 import { Loader2 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { runDemoScenarioWithToast  } from '@/lib/demo-scenario-trigger';
+import type {DemoScenarioKey} from '@/lib/demo-scenario-trigger';
 import { cn } from '@/lib/utils';
-import trigger from '@/routes/api/trigger';
 
-type ScenarioKey = 'room_delay' | 'angry_tweet' | 'occupancy_spike' | 'guest_churn';
-
-const SCENARIOS: { id: ScenarioKey; label: string }[] = [
+const SCENARIOS: { id: DemoScenarioKey; label: string }[] = [
     { id: 'room_delay', label: 'Late room service' },
     { id: 'occupancy_spike', label: 'Hotel fills up' },
     { id: 'angry_tweet', label: 'Guest complaint online' },
@@ -16,30 +15,22 @@ const SCENARIOS: { id: ScenarioKey; label: string }[] = [
 
 export function HackathonScenarioButtons() {
     const { csrfToken, demoTriggersEnabled } = usePage().props as { csrfToken?: string; demoTriggersEnabled?: boolean };
-    const [busy, setBusy] = useState<ScenarioKey | null>(null);
+    const [busy, setBusy] = useState<DemoScenarioKey | null>(null);
 
     const run = useCallback(
-        async (scenario: ScenarioKey) => {
+        async (scenario: DemoScenarioKey) => {
             if (!demoTriggersEnabled) {
                 return;
             }
 
+            const label = SCENARIOS.find((x) => x.id === scenario)?.label ?? scenario;
+
             setBusy(scenario);
 
             try {
-                await fetch(trigger.scenario.url(), {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Accept: 'application/json',
-                        'X-CSRF-TOKEN': csrfToken ?? '',
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                    credentials: 'same-origin',
-                    body: JSON.stringify({ scenario }),
-                });
+                await runDemoScenarioWithToast(scenario, csrfToken ?? '', label);
             } catch {
-                /* judges: no error surface */
+                /* Toast shows error */
             } finally {
                 setBusy(null);
             }

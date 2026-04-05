@@ -4,6 +4,8 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { queryClient } from '@/app/queryClient';
+import { DemoScenarioRunProgress } from '@/components/dashboard/demo-scenario-run-progress';
+import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import './echo';
 import '../css/app.css';
@@ -26,6 +28,8 @@ createInertiaApp({
                 <QueryClientProvider client={queryClient}>
                     <TooltipProvider delayDuration={0}>
                         <App {...props} />
+                        <DemoScenarioRunProgress />
+                        <Toaster position="top-right" closeButton richColors />
                     </TooltipProvider>
                 </QueryClientProvider>
             </StrictMode>,
