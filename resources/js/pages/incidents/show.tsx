@@ -43,7 +43,8 @@ export default function IncidentShow() {
             ]}
         >
             <Head title={`Issue — ${incident.type}`} />
-            <div className="mx-auto max-w-3xl space-y-4 p-4">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col px-4 py-4 md:px-6 md:py-5">
+                <div className="mx-auto w-full max-w-3xl space-y-4">
                 <Card className="rounded-xl border-muted p-4 shadow-sm">
                     <div className="mb-3 flex flex-wrap items-center gap-2">
                         <h2 className="text-lg font-semibold tracking-tight">{incident.type}</h2>
@@ -115,6 +116,7 @@ export default function IncidentShow() {
                         </ul>
                     )}
                 </Card>
+                </div>
             </div>
         </AppLayout>
     );

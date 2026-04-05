@@ -26,7 +26,7 @@ export function AriaChatPanel({ messages, onBack, emptyHint, className }: Props)
     }, [messages]);
 
     return (
-        <div className={cn('flex min-h-0 flex-1 flex-col', className)}>
+        <div className={cn('flex min-h-0 max-w-3xl mx-auto flex-1 flex-col', className)}>
             <div className="border-border/50 flex shrink-0 items-center gap-2 border-b pb-2">
                 <Button
                     type="button"

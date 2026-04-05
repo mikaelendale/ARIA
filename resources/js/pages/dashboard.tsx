@@ -244,7 +244,7 @@ export default function Dashboard() {
                                     <aside
                                         className={cn(
                                             'flex min-w-0 flex-col gap-5',
-                                            'xl:sticky xl:top-0 xl:max-h-[calc(100dvh-2rem)] xl:overflow-y-auto xl:pt-0.5',
+                                            'xl:sticky xl:top-0 xl:pt-0.5',
                                         )}
                                     >
                                         {vis.showDemoPanel ? (

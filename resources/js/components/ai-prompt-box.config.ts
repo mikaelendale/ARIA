@@ -31,13 +31,13 @@ export type PromptBoxFeatures = {
 
 /** Default: everything on (matches original component). */
 export const defaultPromptBoxFeatures: PromptBoxFeatures = {
-    imageAttachment: true,
-    dragAndDrop: true,
+    imageAttachment: false,
+    dragAndDrop: false,
     clipboardPaste: true,
-    searchMode: true,
+    searchMode: false,
     thinkMode: false,
     canvasMode: false,
-    voiceInput: true,
+    voiceInput: false,
     modeDividers: false,
     imagePreviewModal: true,
 };

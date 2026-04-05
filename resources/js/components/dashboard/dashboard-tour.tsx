@@ -6,6 +6,7 @@ import { Map } from 'lucide-react';
 import type { CSSProperties, ReactNode } from 'react';
 import { useEffect, useMemo, useSyncExternalStore } from 'react';
 import { Button } from '@/components/ui/button';
+import { useAppearance } from '@/hooks/use-appearance';
 import type { DashboardVisibility } from '@/lib/aria-roles';
 import { cn } from '@/lib/utils';
 
@@ -153,10 +154,12 @@ export function DashboardTourProvider({ children, vis, hasQueueSnapshot }: Provi
         getReducedMotionSnapshot,
         getReducedMotionServerSnapshot,
     );
+    const { resolvedAppearance } = useAppearance();
 
     return (
         <TourProvider
             steps={steps}
+            maskClassName="aria-tour-mask"
             showNavigation
             showPrevNextButtons
             showCloseButton
@@ -172,6 +175,12 @@ export function DashboardTourProvider({ children, vis, hasQueueSnapshot }: Provi
                     ...base,
                     color: 'var(--tour-overlay)',
                     opacity: 1,
+                    ...(resolvedAppearance === 'dark'
+                        ? {
+                              backdropFilter: 'blur(14px) saturate(1.1)',
+                              WebkitBackdropFilter: 'blur(14px) saturate(1.1)',
+                          }
+                        : {}),
                 }),
                 maskArea: (base) => ({
                     ...base,
@@ -295,13 +304,21 @@ function DashboardTourAutoStart() {
 
 export function DashboardTourTrigger() {
     const { setIsOpen } = useTour();
+    const reduceMotion = useSyncExternalStore(
+        subscribeReducedMotion,
+        getReducedMotionSnapshot,
+        getReducedMotionServerSnapshot,
+    );
 
     return (
         <Button
             type="button"
             variant="outline"
             size="sm"
-            className="h-8 gap-1.5 rounded-sm border-border bg-background text-xs font-medium shadow-none"
+            className={cn(
+                'h-8 gap-1.5 rounded-sm border-border bg-background text-xs font-medium shadow-none',
+                !reduceMotion && 'aria-quick-tour-jump',
+            )}
             onClick={() => setIsOpen(true)}
         >
             <Map className="size-3.5 opacity-80" aria-hidden />

@@ -47,27 +47,78 @@ function emptyStats(): DashboardStats {
     };
 }
 
+function asFiniteNumber(value: unknown, fallback = 0): number {
+    if (typeof value === 'number') {
+        return Number.isFinite(value) ? value : fallback;
+    }
+
+    if (typeof value === 'string' && value.trim() !== '') {
+        const n = Number(value);
+
+        return Number.isFinite(n) ? n : fallback;
+    }
+
+    return fallback;
+}
+
+function normalizeQueueSnapshot(raw: unknown): DashboardStats['queueSnapshot'] {
+    const empty = emptyStats().queueSnapshot;
+    if (!raw || typeof raw !== 'object') {
+        return empty;
+    }
+
+    const o = raw as Record<string, unknown>;
+    const pendingRaw = o.pendingByQueue;
+    const pendingByQueue: Record<string, number> =
+        pendingRaw && typeof pendingRaw === 'object' && !Array.isArray(pendingRaw)
+            ? Object.fromEntries(
+                  Object.entries(pendingRaw as Record<string, unknown>).map(([k, v]) => [
+                      k,
+                      asFiniteNumber(v, 0),
+                  ]),
+              )
+            : {};
+
+    return {
+        connection: typeof o.connection === 'string' ? o.connection : empty.connection,
+        pendingByQueue,
+        pendingTotal: asFiniteNumber(o.pendingTotal, 0),
+        failedLast24h: asFiniteNumber(o.failedLast24h, 0),
+    };
+}
+
+/** Coerce API / Inertia props so charts never see NaN from loose JSON types. */
+export function normalizeDashboardStats(raw: Partial<DashboardPageProps> | null | undefined): DashboardStats {
+    const e = emptyStats();
+
+    return {
+        guests: asFiniteNumber(raw?.guests, 0),
+        incidentsOpen: asFiniteNumber(raw?.incidentsOpen, 0),
+        resolvedToday: asFiniteNumber(raw?.resolvedToday, 0),
+        churnScore: asFiniteNumber(raw?.churnScore, 0),
+        initialRevenueImpact: asFiniteNumber(raw?.initialRevenueImpact, 0),
+        initialActions: Array.isArray(raw?.initialActions) ? raw!.initialActions! : e.initialActions,
+        occupancyPercent: asFiniteNumber(raw?.occupancyPercent, 0),
+        revenueImpactToday: asFiniteNumber(raw?.revenueImpactToday, 0),
+        pulseRevenueToday: asFiniteNumber(raw?.pulseRevenueToday, 0),
+        queueSnapshot: normalizeQueueSnapshot(raw?.queueSnapshot),
+    };
+}
+
 export function useDashboardStats(pageProps?: DashboardPageProps | null) {
     const initialData =
         pageProps &&
         (pageProps.guests !== undefined || pageProps.incidentsOpen !== undefined || pageProps.initialActions !== undefined)
-            ? {
-                  guests: pageProps.guests ?? 0,
-                  incidentsOpen: pageProps.incidentsOpen ?? 0,
-                  resolvedToday: pageProps.resolvedToday ?? 0,
-                  churnScore: pageProps.churnScore ?? 0,
-                  initialRevenueImpact: pageProps.initialRevenueImpact ?? 0,
-                  initialActions: pageProps.initialActions ?? [],
-                  occupancyPercent: pageProps.occupancyPercent ?? 0,
-                  revenueImpactToday: pageProps.revenueImpactToday ?? 0,
-                  pulseRevenueToday: pageProps.pulseRevenueToday ?? 0,
-                  queueSnapshot: pageProps.queueSnapshot ?? emptyStats().queueSnapshot,
-              }
+            ? normalizeDashboardStats(pageProps)
             : undefined;
 
     return useQuery({
         queryKey: ['dashboard', 'stats'],
-        queryFn: () => getJsonOrFallback<DashboardStats>('/api/ops/dashboard/stats', emptyStats()),
+        queryFn: async () => {
+            const raw = await getJsonOrFallback<Partial<DashboardStats>>('/api/ops/dashboard/stats', emptyStats());
+
+            return normalizeDashboardStats(raw);
+        },
         initialData,
         refetchInterval: 4_000,
     });

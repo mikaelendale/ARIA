@@ -136,15 +136,52 @@ function agentMix(actions: ActionFeedItem[]): { name: string; count: number }[] 
         .slice(0, 6);
 }
 
+/** Y-axis domain so sparklines and line charts use vertical space instead of a flat band. */
+function valueDomain(
+    values: number[],
+    opts: { floor?: number; cap?: number; padRatio?: number } = {},
+): [number, number] {
+    if (values.length === 0) {
+        return [0, 1];
+    }
+
+    const floor = opts.floor ?? Number.NEGATIVE_INFINITY;
+    const cap = opts.cap ?? Number.POSITIVE_INFINITY;
+    const padRatio = opts.padRatio ?? 0.14;
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+
+    if (!Number.isFinite(min) || !Number.isFinite(max)) {
+        return [0, 1];
+    }
+
+    if (min === max) {
+        const p = Math.max(Math.abs(min) * 0.06, min === 0 ? 1 : 0.05 * Math.abs(min));
+
+        return [Math.max(floor, min - p), Math.min(cap, max + p)];
+    }
+
+    const pad = Math.max((max - min) * padRatio, 0.01);
+
+    return [Math.max(floor, min - pad), Math.min(cap, max + pad)];
+}
+
 function ChartTooltipBox({ label, value, detail }: { label: string; value: ReactNode; detail?: string }) {
     return (
-        <div className="border-border bg-popover text-popover-foreground rounded-sm border px-2.5 py-2 text-xs shadow-none">
-            <p className="text-muted-foreground font-medium">{label}</p>
-            {detail ? <p className="text-muted-foreground mt-0.5 text-[10px] leading-snug">{detail}</p> : null}
-            <p className="text-foreground mt-1 font-semibold tabular-nums">{value}</p>
+        <div className="border-border bg-popover text-popover-foreground z-50 max-w-56 rounded-md border px-3 py-2 text-xs shadow-md ring-1 ring-foreground/8 dark:ring-white/10">
+            <p className="text-muted-foreground text-[11px] font-medium leading-snug">{label}</p>
+            {detail ? (
+                <p className="text-muted-foreground mt-1 text-[10px] leading-snug opacity-90">{detail}</p>
+            ) : null}
+            <p className="text-foreground mt-1.5 text-sm font-semibold tabular-nums leading-tight">{value}</p>
         </div>
     );
 }
+
+const chartTooltipProps = {
+    allowEscapeViewBox: { x: true, y: true },
+    wrapperStyle: { zIndex: 50, outline: 'none' },
+} as const;
 
 type Hero = { kicker: string; title: string; body: string };
 
@@ -195,6 +232,10 @@ export function DashboardOverview({
     ].filter((d) => d.value > 0);
 
     const pulseLine = pulseSeries(s);
+    const pulseYDomain = valueDomain(
+        pulseLine.map((p) => p.score),
+        { floor: 0, cap: 100, padRatio: 0.18 },
+    );
 
     const kpis: {
         label: string;
@@ -205,6 +246,8 @@ export function DashboardOverview({
         tooltipLabel: string;
         tooltipDetail: string;
         formatSpark: (v: number) => string;
+        /** When set, spark Y-axis is clamped (e.g. 0–100 for occupancy %). */
+        sparkCap?: number;
     }[] = [
         {
             label: 'Guests on file',
@@ -254,6 +297,7 @@ export function DashboardOverview({
             tooltipLabel: 'Trailing week',
             tooltipDetail: 'Share of rooms marked occupied.',
             formatSpark: (v) => `${v.toFixed(0)}% filled`,
+            sparkCap: 100,
         },
         ...(showPulseRevenue
             ? [
@@ -348,47 +392,75 @@ export function DashboardOverview({
                         kpis.length >= 5 ? 'xl:grid-cols-5' : 'xl:grid-cols-4',
                     )}
                 >
-                    {kpis.map((k) => (
-                        <div key={k.label} className="border-border bg-card rounded-sm border p-2.5 shadow-none">
-                            <p className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
-                                {k.label}
-                            </p>
-                            <p className="text-muted-foreground mt-0.5 text-[10px] leading-snug">{k.hint}</p>
-                            <p className="mt-1.5 text-xl font-semibold tabular-nums tracking-tight">{k.value}</p>
-                            <div className="mt-2 h-9">
-                                <ChartContainer className="h-9 [&>div]:h-full">
-                                    <AreaChart data={k.spark} margin={{ top: 2, right: 2, left: 0, bottom: 0 }}>
-                                        <Tooltip
-                                            cursor={{
-                                                stroke: 'var(--border)',
-                                                strokeWidth: 1,
-                                                strokeDasharray: '3 3',
-                                            }}
-                                            content={({ active, payload }) =>
-                                                active && payload?.length ? (
-                                                    <ChartTooltipBox
-                                                        label={`${k.tooltipLabel} · ${String(payload[0]?.payload?.label)}`}
-                                                        detail={k.tooltipDetail}
-                                                        value={k.formatSpark(Number(payload[0]?.value))}
-                                                    />
-                                                ) : null
-                                            }
-                                        />
-                                        <Area
-                                            type="monotone"
-                                            dataKey="v"
-                                            stroke={k.color}
-                                            strokeWidth={1.5}
-                                            fill={k.color}
-                                            fillOpacity={0.12}
-                                            dot={false}
-                                            activeDot={{ r: 3, strokeWidth: 0, fill: k.color }}
-                                        />
-                                    </AreaChart>
-                                </ChartContainer>
+                    {kpis.map((k) => {
+                        const sparkVals = k.spark.map((row) => row.v);
+                        const yDomain = valueDomain(sparkVals, {
+                            floor: 0,
+                            cap: k.sparkCap,
+                        });
+
+                        return (
+                            <div
+                                key={k.label}
+                                className="border-border bg-card flex min-h-[118px] flex-col rounded-sm border p-2.5 shadow-none"
+                            >
+                                <p className="text-muted-foreground text-[10px] font-semibold tracking-wider uppercase">
+                                    {k.label}
+                                </p>
+                                <p className="text-muted-foreground mt-0.5 text-[10px] leading-snug">{k.hint}</p>
+                                <p className="mt-1.5 text-xl font-semibold tabular-nums tracking-tight">{k.value}</p>
+                                <div className="mt-2 h-11 w-full min-w-0 shrink-0">
+                                    <ChartContainer variant="sparkline" className="h-11 w-full min-w-0">
+                                        <AreaChart data={k.spark} margin={{ top: 2, right: 2, left: 0, bottom: 0 }}>
+                                            <XAxis
+                                                dataKey="label"
+                                                type="category"
+                                                tick={false}
+                                                tickLine={false}
+                                                axisLine={false}
+                                                height={0}
+                                            />
+                                            <YAxis
+                                                domain={yDomain}
+                                                tick={false}
+                                                tickLine={false}
+                                                axisLine={false}
+                                                width={0}
+                                            />
+                                            <Tooltip
+                                                {...chartTooltipProps}
+                                                cursor={{
+                                                    stroke: 'var(--border)',
+                                                    strokeWidth: 1,
+                                                    strokeDasharray: '3 3',
+                                                }}
+                                                content={({ active, payload }) =>
+                                                    active && payload?.length ? (
+                                                        <ChartTooltipBox
+                                                            label={`${k.tooltipLabel} · ${String(payload[0]?.payload?.label)}`}
+                                                            detail={k.tooltipDetail}
+                                                            value={k.formatSpark(Number(payload[0]?.value))}
+                                                        />
+                                                    ) : null
+                                                }
+                                            />
+                                            <Area
+                                                type="monotone"
+                                                dataKey="v"
+                                                stroke={k.color}
+                                                strokeWidth={1.75}
+                                                fill={k.color}
+                                                fillOpacity={0.22}
+                                                dot={false}
+                                                isAnimationActive={false}
+                                                activeDot={{ r: 3, strokeWidth: 0, fill: k.color }}
+                                            />
+                                        </AreaChart>
+                                    </ChartContainer>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
                 <p className="text-muted-foreground mt-1 text-[10px] leading-snug">
                     7-day trail from today&apos;s numbers — hover for detail.
@@ -408,12 +480,19 @@ export function DashboardOverview({
                             </p>
                         </div>
                     </div>
-                    <ChartContainer className="h-[190px]">
-                        <AreaChart data={pulseLine} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                    <ChartContainer className="h-[200px] w-full min-w-0">
+                        <AreaChart data={pulseLine} margin={{ top: 8, right: 8, left: 0, bottom: 4 }}>
                             <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border/50" />
                             <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 10 }} />
-                            <YAxis domain={[0, 100]} width={28} tickLine={false} axisLine={false} tick={{ fontSize: 10 }} />
+                            <YAxis
+                                domain={pulseYDomain}
+                                width={32}
+                                tickLine={false}
+                                axisLine={false}
+                                tick={{ fontSize: 10 }}
+                            />
                             <Tooltip
+                                {...chartTooltipProps}
                                 cursor={{ stroke: 'var(--border)', strokeWidth: 1, strokeDasharray: '3 3' }}
                                 content={({ active, payload }) =>
                                     active && payload?.length ? (
@@ -431,8 +510,9 @@ export function DashboardOverview({
                                 stroke="var(--chart-1)"
                                 strokeWidth={2}
                                 fill="var(--chart-1)"
-                                fillOpacity={0.1}
+                                fillOpacity={0.18}
                                 dot={false}
+                                isAnimationActive={false}
                                 activeDot={{ r: 4, strokeWidth: 0, fill: 'var(--chart-1)' }}
                             />
                         </AreaChart>
@@ -447,20 +527,22 @@ export function DashboardOverview({
                         </p>
                         <p className="text-muted-foreground mt-0.5 text-[11px] leading-snug">Inventory split from live room flags.</p>
                     </div>
-                    <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center sm:gap-4">
+                    <div className="flex min-h-[200px] flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:gap-6">
                         {occData.length === 0 ? (
                             <div className="text-muted-foreground flex min-h-[168px] w-full max-w-[180px] items-center justify-center rounded-sm border border-dashed border-border p-3 text-center text-[11px]">
                                 No room data yet.
                             </div>
                         ) : (
-                            <ChartContainer className="h-[180px] max-w-[180px]">
+                            <ChartContainer className="mx-auto h-[200px] w-full min-w-0 max-w-[280px] shrink-0 sm:mx-0 sm:flex-1 sm:max-w-none">
                                 <PieChart>
                                     <Pie
                                         data={occData}
                                         dataKey="value"
                                         nameKey="name"
-                                        innerRadius={52}
-                                        outerRadius={72}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={56}
+                                        outerRadius={92}
                                         strokeWidth={2}
                                         stroke="var(--background)"
                                         paddingAngle={1}
@@ -470,6 +552,7 @@ export function DashboardOverview({
                                         ))}
                                     </Pie>
                                     <Tooltip
+                                        {...chartTooltipProps}
                                         content={({ active, payload }) =>
                                             active && payload?.length ? (
                                                 <ChartTooltipBox
@@ -508,11 +591,11 @@ export function DashboardOverview({
                             All clear — or running in sync mode.
                         </div>
                     ) : (
-                        <ChartContainer className="h-[176px]">
+                        <ChartContainer className="h-[180px] w-full min-w-0">
                             <BarChart
                                 data={queueRows}
                                 layout="vertical"
-                                margin={{ top: 2, right: 10, left: 2, bottom: 2 }}
+                                margin={{ top: 4, right: 12, left: 4, bottom: 4 }}
                             >
                                 <CartesianGrid horizontal={false} strokeDasharray="3 3" className="stroke-border/50" />
                                 <XAxis type="number" tickLine={false} axisLine={false} allowDecimals={false} tick={{ fontSize: 10 }} />
@@ -525,6 +608,7 @@ export function DashboardOverview({
                                     tick={{ fontSize: 10 }}
                                 />
                                 <Tooltip
+                                    {...chartTooltipProps}
                                     cursor={{ fill: 'var(--muted)', opacity: 0.35 }}
                                     content={({ active, payload }) =>
                                         active && payload?.length ? (
@@ -553,8 +637,8 @@ export function DashboardOverview({
                             No steps in this sample yet.
                         </div>
                     ) : (
-                        <ChartContainer className="h-[200px]">
-                            <BarChart data={agents} margin={{ top: 4, right: 4, left: 0, bottom: 28 }}>
+                        <ChartContainer className="h-[210px] w-full min-w-0">
+                            <BarChart data={agents} margin={{ top: 6, right: 8, left: 0, bottom: 28 }}>
                                 <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-border/50" />
                                 <XAxis
                                     dataKey="name"
@@ -567,6 +651,7 @@ export function DashboardOverview({
                                 />
                                 <YAxis tickLine={false} axisLine={false} width={22} allowDecimals={false} tick={{ fontSize: 10 }} />
                                 <Tooltip
+                                    {...chartTooltipProps}
                                     cursor={{ fill: 'var(--muted)', opacity: 0.3 }}
                                     content={({ active, payload }) =>
                                         active && payload?.length ? (

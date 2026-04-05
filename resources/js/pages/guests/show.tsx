@@ -49,7 +49,8 @@ export default function GuestShow() {
             ]}
         >
             <Head title={`${guest.name} — Guest`} />
-            <div className="mx-auto max-w-5xl space-y-4 p-4">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col px-4 py-4 md:px-6 md:py-5">
+                <div className="mx-auto w-full max-w-5xl space-y-4">
                 <div className="grid gap-4 lg:grid-cols-2">
                     <Card className="rounded-xl border-muted p-4 shadow-sm">
                         <h2 className="text-muted-foreground mb-3 text-xs font-semibold uppercase tracking-wider">
@@ -183,6 +184,7 @@ export default function GuestShow() {
                         </ul>
                     )}
                 </SectionCard>
+                </div>
             </div>
         </AppLayout>
     );

@@ -16,7 +16,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 function formatMoney(n: number, currency: string): string {
-    return `${n.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${currency}`;
+    const safe = Number.isFinite(n) ? n : 0;
+
+    return `${safe.toLocaleString(undefined, { maximumFractionDigits: 0 })} ${currency}`;
 }
 
 export default function RevenuePage() {
@@ -25,6 +27,7 @@ export default function RevenuePage() {
         currency,
         periodLabel,
         generatedAt,
+        snapshotNote,
         kpis,
         daily,
         segments,
@@ -33,35 +36,38 @@ export default function RevenuePage() {
         staffActions,
     } = props;
 
-    const positive = kpis.wowChangePct >= 0;
+    const wowSafe = Number.isFinite(kpis.wowChangePct) ? kpis.wowChangePct : 0;
+    const positive = wowSafe >= 0;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Revenue — Kuriftu" />
-            <div className="space-y-8 py-6">
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-6 px-4 py-4 md:px-6 md:py-5">
                 <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
                         <p className="text-muted-foreground text-xs font-semibold tracking-widest uppercase">
                             Finance & ops
                         </p>
                         <Badge variant="secondary" className="text-[10px] font-normal">
-                            Demo data
+                            Live data
                         </Badge>
                     </div>
-                    <h1 className="text-2xl font-semibold tracking-tight">Revenue intelligence</h1>
+                    <h1 className="text-foreground text-2xl font-semibold tracking-tight">Revenue intelligence</h1>
                     <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
-                        Seeded scenarios and charts so front office and managers can rehearse how ARIA explains money:
-                        spikes, mix, and what PULSE may have influenced — without touching live ledgers.
+                        Same sources as the overview: room bookings by check-in date and revenue impact logged on AI agent
+                        actions. Use it to narrate the operational story alongside guests and issues — not as audited
+                        financials.
                     </p>
-                    <p className="text-muted-foreground text-[11px]">
+                    <p className="text-muted-foreground text-[11px] leading-relaxed">
                         {periodLabel} · snapshot {new Date(generatedAt).toLocaleString()}
                     </p>
+                    <p className="text-muted-foreground max-w-2xl text-[11px] leading-relaxed">{snapshotNote}</p>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <Card className="border-border/50 shadow-none">
+                <div className="grid min-w-0 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <Card className="border-border rounded-sm shadow-none">
                         <CardHeader className="pb-2">
-                            <CardDescription>Total revenue</CardDescription>
+                            <CardDescription>Combined total</CardDescription>
                             <CardTitle className="text-2xl font-semibold tabular-nums">
                                 {formatMoney(kpis.totalRevenue, currency)}
                             </CardTitle>
@@ -74,29 +80,33 @@ export default function RevenuePage() {
                             )}
                             <span>
                                 {positive ? '+' : ''}
-                                {kpis.wowChangePct}% vs prior window
+                                {wowSafe}% vs prior window
                             </span>
                         </CardContent>
                     </Card>
-                    <Card className="border-border/50 shadow-none">
+                    <Card className="border-border rounded-sm shadow-none">
                         <CardHeader className="pb-2">
                             <CardDescription>ADR</CardDescription>
                             <CardTitle className="text-2xl font-semibold tabular-nums">
                                 {formatMoney(kpis.adr, currency)}
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="text-muted-foreground text-xs">Average daily rate (demo)</CardContent>
+                        <CardContent className="text-muted-foreground text-xs">
+                            Average booking value on check-in (window)
+                        </CardContent>
                     </Card>
-                    <Card className="border-border/50 shadow-none">
+                    <Card className="border-border rounded-sm shadow-none">
                         <CardHeader className="pb-2">
                             <CardDescription>RevPAR</CardDescription>
                             <CardTitle className="text-2xl font-semibold tabular-nums">
                                 {formatMoney(kpis.revpar, currency)}
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="text-muted-foreground text-xs">Revenue per available room</CardContent>
+                        <CardContent className="text-muted-foreground text-xs">
+                            Booking revenue ÷ rooms ÷ days (window)
+                        </CardContent>
                     </Card>
-                    <Card className="border-border/50 shadow-none">
+                    <Card className="border-border rounded-sm shadow-none">
                         <CardHeader className="pb-2">
                             <CardDescription>PULSE-attributed</CardDescription>
                             <CardTitle className="text-2xl font-semibold tabular-nums">
@@ -104,13 +114,13 @@ export default function RevenuePage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="text-muted-foreground text-xs">
-                            Pricing & promo lift (illustrative)
+                            Logged PULSE / pricing / promo tool impact
                         </CardContent>
                     </Card>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-5">
-                    <Card className="border-border/50 lg:col-span-3">
+                <div className="grid min-w-0 gap-6 lg:grid-cols-5">
+                    <Card className="border-border rounded-sm shadow-none lg:col-span-3">
                         <CardHeader>
                             <div className="flex items-start justify-between gap-2">
                                 <div>
@@ -132,7 +142,7 @@ export default function RevenuePage() {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-border/50 bg-muted/20 lg:col-span-2">
+                    <Card className="border-border rounded-sm bg-muted/20 shadow-none lg:col-span-2">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-base">
                                 <Sparkles className="text-chart-4 size-4" />
@@ -163,23 +173,29 @@ export default function RevenuePage() {
                                 </ul>
                             </div>
                             <p className="text-muted-foreground text-[11px]">
-                                Confidence: {aiOverview.confidence} — use as training narrative only.
+                                Source: {aiOverview.confidence} — template summary from live aggregates.
                             </p>
                         </CardContent>
                     </Card>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-2">
-                    <Card className="border-border/50">
+                <div className="grid min-w-0 gap-6 lg:grid-cols-2">
+                    <Card className="border-border rounded-sm shadow-none">
                         <CardHeader>
-                            <CardTitle className="text-base">Real-life style scenarios</CardTitle>
-                            <CardDescription>Why the line moved — stories staff can retell to guests or leadership</CardDescription>
+                            <CardTitle className="text-base">Strongest days</CardTitle>
+                            <CardDescription>Highest combined booking + AI impact vs the period average</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                            {scenarios.length === 0 ? (
+                                <p className="text-muted-foreground text-sm leading-relaxed">
+                                    No standout days in this window yet — once bookings or agent actions land on the calendar,
+                                    peaks will show here.
+                                </p>
+                            ) : null}
                             {scenarios.map((s) => (
                                 <div
                                     key={s.id}
-                                    className="border-border/60 rounded-lg border bg-card/50 px-4 py-3 transition-colors hover:bg-muted/30"
+                                    className="border-border bg-card/50 hover:bg-muted/30 rounded-sm border px-4 py-3 transition-colors"
                                 >
                                     <div className="flex flex-wrap items-center justify-between gap-2">
                                         <p className="text-foreground font-medium">{s.title}</p>
@@ -187,7 +203,7 @@ export default function RevenuePage() {
                                     </div>
                                     <p className="text-muted-foreground mt-1 text-xs">{s.dayLabel}</p>
                                     <p className="text-chart-1 mt-2 text-sm font-semibold tabular-nums">
-                                        +{formatMoney(s.impact, currency)} estimated lift
+                                        +{formatMoney(s.impact, currency)} vs average day
                                     </p>
                                     <p className="text-muted-foreground mt-2 text-[13px] leading-relaxed">{s.story}</p>
                                 </div>
@@ -195,10 +211,10 @@ export default function RevenuePage() {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-border/50">
+                    <Card className="border-border rounded-sm shadow-none">
                         <CardHeader>
                             <CardTitle className="text-base">Revenue mix</CardTitle>
-                            <CardDescription>Where the property earned over the window (demo split)</CardDescription>
+                            <CardDescription>Bookings vs AI-logged buckets (same window)</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <RevenueMixChart segments={segments} currency={currency} />
@@ -206,10 +222,10 @@ export default function RevenuePage() {
                     </Card>
                 </div>
 
-                <Card className="border-border/50 border-dashed">
+                <Card className="border-border rounded-sm border-dashed shadow-none">
                     <CardHeader>
                         <CardTitle className="text-base">Suggested staff actions</CardTitle>
-                        <CardDescription>Concrete next steps derived from the same demo patterns</CardDescription>
+                        <CardDescription>Grounded in current window trends</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <ul className="text-foreground space-y-3 text-sm leading-relaxed">

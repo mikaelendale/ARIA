@@ -43,10 +43,13 @@ function ChartContainer({
   children,
   config = {},
   initialDimension = INITIAL_DIMENSION,
+  variant = "default",
   ...props
 }: React.ComponentProps<"div"> & {
   /** When omitted, no theme CSS variables are injected (inline chart colors still work). */
   config?: ChartConfig
+  /** `sparkline` drops fixed aspect ratio so charts fill the card width/height. */
+  variant?: "default" | "sparkline"
   children: React.ComponentProps<
     typeof RechartsPrimitive.ResponsiveContainer
   >["children"]
@@ -63,15 +66,24 @@ function ChartContainer({
       <div
         data-slot="chart"
         data-chart={chartId}
+        data-chart-variant={variant}
         className={cn(
-          "flex aspect-video justify-center text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
+          "flex w-full text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/50 [&_.recharts-curve.recharts-tooltip-cursor]:stroke-border [&_.recharts-dot[stroke='#fff']]:stroke-transparent [&_.recharts-layer]:outline-hidden [&_.recharts-polar-grid_[stroke='#ccc']]:stroke-border [&_.recharts-radial-bar-background-sector]:fill-muted [&_.recharts-rectangle.recharts-tooltip-cursor]:fill-muted [&_.recharts-reference-line_[stroke='#ccc']]:stroke-border [&_.recharts-sector]:outline-hidden [&_.recharts-sector[stroke='#fff']]:stroke-transparent [&_.recharts-surface]:outline-hidden",
+          variant === "sparkline"
+            ? "min-h-0 min-w-0 justify-stretch [&_.recharts-responsive-container]:h-full [&_.recharts-responsive-container]:min-h-11 [&_.recharts-responsive-container]:w-full [&_.recharts-wrapper]:h-full [&_.recharts-wrapper]:min-h-11 [&_.recharts-wrapper]:w-full"
+            : "aspect-video justify-center",
           className
         )}
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
         <RechartsPrimitive.ResponsiveContainer
-          initialDimension={initialDimension}
+          initialDimension={
+            variant === "sparkline"
+              ? { width: INITIAL_DIMENSION.width, height: 44 }
+              : initialDimension
+          }
+          minHeight={variant === "sparkline" ? 44 : undefined}
         >
           {children}
         </RechartsPrimitive.ResponsiveContainer>

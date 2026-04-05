@@ -160,6 +160,24 @@ class PhaseNineWebhooksAndControllersTest extends TestCase
                 ->has('queueSnapshot'));
     }
 
+    public function test_revenue_inertia_includes_live_payload(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $this->get(route('revenue'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('revenue')
+                ->has('snapshotNote')
+                ->has('kpis')
+                ->has('daily')
+                ->has('segments')
+                ->has('scenarios')
+                ->has('aiOverview')
+                ->has('staffActions'));
+    }
+
     public function test_guest_show_includes_nested_relations(): void
     {
         $user = User::factory()->create();

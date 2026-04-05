@@ -201,7 +201,8 @@
         oklch(1 0 0 / 10%);
     --sidebar-ring:
         oklch(0.556 0 0);
-    --tour-overlay: oklch(0.08 0.01 260 / 0.88);
+    /* Dimmed tour backdrop: ~50% black so the page still reads through (“glass” with blur on wrapper). */
+    --tour-overlay: oklch(0 0 0 / 0.5);
 }
 
 @layer base {
@@ -251,6 +252,29 @@
     animation: aria-demo-run-indeterminate 1.12s ease-in-out infinite;
 }
 
+/* Quick tour trigger — gentle repeating jump so users notice the control */
+@keyframes aria-quick-tour-jump {
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+    30% {
+        transform: translateY(-5px) scale(1.03);
+    }
+    55% {
+        transform: translateY(0) scale(1);
+    }
+    75% {
+        transform: translateY(-2px) scale(1.015);
+    }
+}
+
+.aria-quick-tour-jump {
+    animation: aria-quick-tour-jump 1.2s ease-in-out infinite;
+    transform-origin: center;
+    will-change: transform;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .aria-tour-cta-pop {
         animation: none;
@@ -259,6 +283,10 @@
     .aria-demo-run-indeterminate {
         animation: none;
         opacity: 0.9;
+    }
+
+    .aria-quick-tour-jump {
+        animation: none;
     }
 }
 

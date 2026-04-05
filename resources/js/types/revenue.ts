@@ -32,6 +32,8 @@ export type RevenuePageProps = {
     currency: string;
     periodLabel: string;
     generatedAt: string;
+    /** How totals are built (bookings + agent log). */
+    snapshotNote: string;
     kpis: {
         totalRevenue: number;
         wowChangePct: number;

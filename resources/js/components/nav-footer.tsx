@@ -27,12 +27,12 @@ export function NavFooter({
                         <SidebarMenuItem key={item.title}>
                             <SidebarMenuButton
                                 asChild
-                                className="text-neutral-600 hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-100"
+                                className="text-muted-foreground hover:text-foreground"
                             >
                                 <a
                                     href={toUrl(item.href)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    target={item.href === '#' ? undefined : '_blank'}
+                                    rel={item.href === '#' ? undefined : 'noopener noreferrer'}
                                 >
                                     {item.icon && (
                                         <item.icon className="h-5 w-5" />

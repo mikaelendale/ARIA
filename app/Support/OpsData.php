@@ -51,6 +51,11 @@ class OpsData
         $start = Carbon::now($tz)->startOfDay();
         $end = Carbon::now($tz)->endOfDay();
 
+        return self::agentRevenueImpactBetween($start, $end);
+    }
+
+    public static function agentRevenueImpactBetween(Carbon $start, Carbon $end): float
+    {
         return (float) AgentAction::query()
             ->whereBetween('fired_at', [$start, $end])
             ->sum('revenue_impact');
@@ -65,13 +70,43 @@ class OpsData
         $start = Carbon::now($tz)->startOfDay();
         $end = Carbon::now($tz)->endOfDay();
 
+        return self::pulseRevenueImpactBetween($start, $end);
+    }
+
+    public static function pulseRevenueImpactBetween(Carbon $start, Carbon $end): float
+    {
         return (float) AgentAction::query()
             ->whereBetween('fired_at', [$start, $end])
             ->where(function ($q): void {
                 $q->whereRaw('LOWER(agent_name) = ?', ['pulse'])
                     ->orWhereIn('tool_called', ['adjust_pricing', 'send_promo']);
             })
+            ->where(function ($q): void {
+                $q->where('tool_called', '!=', 'apply_discount')
+                    ->orWhereNull('tool_called');
+            })
             ->sum('revenue_impact');
+    }
+
+    /** Sum of revenue_impact for apply_discount tool calls in the window. */
+    public static function discountRevenueImpactBetween(Carbon $start, Carbon $end): float
+    {
+        return (float) AgentAction::query()
+            ->whereBetween('fired_at', [$start, $end])
+            ->where('tool_called', 'apply_discount')
+            ->sum('revenue_impact');
+    }
+
+    /**
+     * Agent revenue in the window excluding PULSE-style and discount rows (mutually exclusive buckets for reporting).
+     */
+    public static function otherAgentRevenueImpactBetween(Carbon $start, Carbon $end): float
+    {
+        $total = self::agentRevenueImpactBetween($start, $end);
+        $pulse = self::pulseRevenueImpactBetween($start, $end);
+        $discount = self::discountRevenueImpactBetween($start, $end);
+
+        return max(0.0, (float) round($total - $pulse - $discount, 2));
     }
 
     /**

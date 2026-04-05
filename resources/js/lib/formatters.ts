@@ -1,16 +1,22 @@
+function finiteNumber(amount: number): number {
+    const n = typeof amount === 'number' ? amount : Number(amount);
+
+    return Number.isFinite(n) ? n : 0;
+}
+
 export function formatCurrencyETB(amount: number): string {
     return new Intl.NumberFormat('en-ET', {
         style: 'currency',
         currency: 'ETB',
         maximumFractionDigits: 0,
-    }).format(amount);
+    }).format(finiteNumber(amount));
 }
 
 export function formatCompactNumber(amount: number): string {
     return new Intl.NumberFormat('en-US', {
         notation: 'compact',
         maximumFractionDigits: 1,
-    }).format(amount);
+    }).format(finiteNumber(amount));
 }
 
 export function formatRelativeTime(timestamp: string): string {
