@@ -7,18 +7,38 @@ const ORB_PALETTES: [string, string][] = [
     ['#CADCFC', '#A0B9D1'],
 ];
 
-export function OrbDemo({ small = false }: { small?: boolean }) {
+export function OrbDemo({
+    small = false,
+    /** Kiosk column: no card chrome, smaller orb, no duplicate headings */
+    embedded = false,
+}: {
+    small?: boolean;
+    embedded?: boolean;
+}) {
     const [agent, setAgent] = useState<AgentState>(null);
     const palettes = small ? [ORB_PALETTES[0]!] : ORB_PALETTES;
 
-    return (
-        <div className="bg-card w-full rounded-lg border p-6">
-            <div className="mb-4">
-                <h3 className="text-lg font-semibold">Agent Orbs</h3>
-                <p className="text-muted-foreground text-sm">Interactive orb visualization with agent states</p>
-            </div>
+    const orbSize = embedded
+        ? 'h-[min(52vmin,18rem)] w-[min(52vmin,18rem)] max-w-full p-1.5'
+        : small
+          ? 'h-40 w-40 p-1'
+          : 'h-[min(82vmin,32rem)] w-[min(82vmin,32rem)] max-w-[95vw] p-2';
 
-            <div className="space-y-4">
+    return (
+        <div
+            className={cn(
+                'w-full',
+                embedded ? 'p-0' : 'bg-card rounded-lg border p-6',
+            )}
+        >
+            {!embedded ? (
+                <div className="mb-4">
+                    <h3 className="text-lg font-semibold">Agent Orbs</h3>
+                    <p className="text-muted-foreground text-sm">Interactive orb visualization with agent states</p>
+                </div>
+            ) : null}
+
+            <div className={cn('space-y-4', embedded && 'space-y-3')}>
                 <div className="flex justify-center gap-8">
                     {palettes.map((colors, index) => (
                         <div
@@ -27,10 +47,8 @@ export function OrbDemo({ small = false }: { small?: boolean }) {
                         >
                             <div
                                 className={cn(
-                                    'bg-muted relative mx-auto max-w-[95vw] rounded-full shadow-[inset_0_2px_8px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]',
-                                    small
-                                        ? 'h-40 w-40 p-1'
-                                        : 'h-[min(82vmin,32rem)] w-[min(82vmin,32rem)] p-2',
+                                    'bg-muted relative mx-auto rounded-full shadow-[inset_0_2px_8px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_2px_8px_rgba(0,0,0,0.5)]',
+                                    orbSize,
                                 )}
                             >
                                 <div className="bg-background h-full w-full overflow-hidden rounded-full shadow-[inset_0_0_12px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_0_12px_rgba(0,0,0,0.3)]">

@@ -1,23 +1,24 @@
 import { Head } from '@inertiajs/react';
-import { OrbDemo } from '@/components/guest/orb-demo';
+import { GuestKioskLayout } from '@/components/guest/guest-kiosk-layout';
 
 /**
- * Public kiosk-style page for guests: no app chrome, WebGL orb + agent states.
+ * Public kiosk-style page for guests: no app chrome — WhatsApp mock, activity, voice orb, at a glance.
  */
 export default function GuestVoice() {
     return (
         <>
-            <Head title="Voice assistant" />
-            <div className="flex min-h-dvh flex-col bg-zinc-950 text-zinc-100">
-                <main className="flex flex-1 flex-col items-center justify-center px-6 py-12">
-                    <p className="mb-10 text-center text-xs font-medium uppercase tracking-[0.35em] text-zinc-500">
+            <Head title="Guest concierge" />
+            <div className="bg-background text-foreground flex min-h-dvh flex-col">
+                <main className="flex flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
+                    <p className="text-muted-foreground mb-6 text-center text-xs font-medium uppercase tracking-[0.35em]">
                         Kuriftu ARIA
                     </p>
-                    <div className="w-full max-w-4xl">
-                        <OrbDemo />
+                    <div className="mx-auto w-full max-w-5xl flex-1">
+                        <GuestKioskLayout />
                     </div>
-                    <p className="mt-16 max-w-sm text-center text-sm leading-relaxed text-zinc-400">
-                        Your voice concierge is ready. This is a preview display — speak when your host enables listening.
+                    <p className="text-muted-foreground mx-auto mt-10 max-w-lg text-center text-sm leading-relaxed">
+                        Demo display — WhatsApp and activity feeds are illustrative. Voice orb is interactive; speak when
+                        your host enables listening.
                     </p>
                 </main>
             </div>
