@@ -1,15 +1,14 @@
 import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
-import { dashboard, login, register } from '@/routes';
+import { Menu, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { dashboard, login } from '@/routes';
 
 const navLinks = [
-    'Product',
-    'Solutions',
-    'Pricing',
-    'Developers',
-    'Resources',
-    'Company',
+    { label: 'Agents', href: '#agents-showcase' },
+    { label: 'How it works', href: '#stats-section' },
+    { label: 'About', href: '#about-section' },
+    { label: 'Contact', href: '#footer' },
 ];
 
 export default function Navbar({
@@ -19,36 +18,78 @@ export default function Navbar({
 }) {
     const { auth } = usePage().props;
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 48);
+        };
+        window.addEventListener('scroll', handleScroll);
+        handleScroll();
+
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const handleAnchorClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+        if (href.startsWith('#')) {
+            e.preventDefault();
+            const el = document.querySelector(href);
+
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+                setMobileOpen(false);
+            }
+        }
+    };
 
     return (
-        <nav className="fixed top-0 right-0 left-0 z-50">
-            {/* Full-width, integrated design */}
-            <div className="flex w-full items-center justify-between border-b border-white/5 bg-black/40 px-6 py-4 backdrop-blur-xl lg:px-10">
+        <nav
+            className={`sticky top-0 z-50 w-full transition-colors duration-300 ${
+                scrolled
+                    ? 'border-b border-gray-200/80 bg-white/90 backdrop-blur-xl'
+                    : 'border-b border-transparent bg-black/30 backdrop-blur-md'
+            }`}
+        >
+            <div className="mx-auto flex w-full max-w-4xl items-center justify-between px-4 py-3.5 sm:px-6">
                 <Link
                     href="/"
                     className="flex items-center gap-2 transition-opacity hover:opacity-80"
                 >
-                    <span className="text-xl font-extrabold tracking-tight text-white">
+                    <span
+                        className={`text-lg font-medium tracking-tight transition-colors duration-300 ${
+                            scrolled ? 'text-gray-900' : 'text-white'
+                        }`}
+                    >
                         ARIA
                     </span>
                 </Link>
 
                 <div className="hidden items-center gap-8 lg:flex">
                     {navLinks.map((link) => (
-                        <button
-                            key={link}
-                            className="cursor-pointer text-sm font-medium text-white/60 transition-colors duration-200 hover:text-white"
+                        <a
+                            key={link.label}
+                            href={link.href}
+                            onClick={(e) => handleAnchorClick(e, link.href)}
+                            className={`cursor-pointer text-sm font-medium transition-colors ${
+                                scrolled
+                                    ? 'text-gray-600 hover:text-gray-900'
+                                    : 'text-white/70 hover:text-white'
+                            }`}
                         >
-                            {link}
-                        </button>
+                            {link.label}
+                        </a>
                     ))}
                 </div>
 
-                <div className="hidden items-center gap-4 lg:flex">
+                <div className="hidden items-center gap-3 lg:flex">
                     {auth.user ? (
                         <Button
                             asChild
-                            className="rounded-full font-semibold text-black hover:bg-white/90 px-6"
+                            className={`rounded-full px-5 text-sm font-medium ${
+                                scrolled
+                                    ? 'bg-gray-900 text-white hover:bg-gray-800'
+                                    : 'bg-white text-gray-900 hover:bg-white/90'
+                            }`}
                         >
                             <Link href={dashboard()}>Dashboard</Link>
                         </Button>
@@ -57,99 +98,114 @@ export default function Navbar({
                             <Button
                                 asChild
                                 variant="ghost"
-                                className="font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white rounded-full px-6"
+                                className={`rounded-full px-4 text-sm font-medium ${
+                                    scrolled
+                                        ? 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                                        : 'text-white/75 hover:bg-white/10 hover:text-white'
+                                }`}
                             >
                                 <Link href={login()}>Request a demo</Link>
                             </Button>
                             {canRegister && (
                                 <Button
                                     asChild
-                                    className="rounded-full font-semibold text-black hover:bg-white/90 shadow-[0_0_15px_rgba(255,255,255,0.05)] px-6"
+                                    className={`rounded-full px-5 text-sm font-medium ${
+                                        scrolled
+                                            ? 'bg-gray-900 text-white hover:bg-gray-800'
+                                            : 'bg-white text-gray-900 hover:bg-white/90'
+                                    }`}
                                 >
-                                    <Link href={register()}>Sign up</Link>
+                                    <Link href={login()}>Get Started</Link>
                                 </Button>
                             )}
                         </>
                     )}
                 </div>
 
-                {/* Mobile Menu Toggle */}
                 <button
-                    className="flex h-9 w-9 items-center justify-center text-white lg:hidden"
+                    type="button"
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors lg:hidden ${
+                        scrolled
+                            ? 'text-gray-900 hover:bg-gray-100'
+                            : 'text-white hover:bg-white/10'
+                    }`}
                     onClick={() => setMobileOpen(!mobileOpen)}
-                    aria-label="Toggle menu"
+                    aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                    aria-expanded={mobileOpen}
                 >
                     {mobileOpen ? (
-                        <svg
-                            width="22"
-                            height="22"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                        >
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
+                        <X size={20} strokeWidth={1.5} />
                     ) : (
-                        <svg
-                            width="22"
-                            height="22"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                        >
-                            <line x1="3" y1="6" x2="21" y2="6" />
-                            <line x1="3" y1="12" x2="21" y2="12" />
-                            <line x1="3" y1="18" x2="21" y2="18" />
-                        </svg>
+                        <Menu size={20} strokeWidth={1.5} />
                     )}
                 </button>
             </div>
 
-            {/* Mobile Nav Content */}
             {mobileOpen && (
-                <div className="absolute top-full right-0 left-0 border-b border-white/5 bg-black/95 px-6 pb-6 pt-4 backdrop-blur-xl">
-                    <div className="flex flex-col gap-5">
-                        {navLinks.map((link) => (
-                            <button
-                                key={link}
-                                className="text-left text-base font-medium text-white/80 transition-colors hover:text-white"
-                            >
-                                {link}
-                            </button>
-                        ))}
-                    </div>
-                    <div className="mt-8 flex flex-col gap-3">
-                        {auth.user ? (
-                            <Button
-                                asChild
-                                className="w-full rounded-full font-semibold text-black hover:bg-white/90"
-                            >
-                                <Link href={dashboard()}>Dashboard</Link>
-                            </Button>
-                        ) : (
-                            <>
+                <div
+                    className={`border-t px-4 pb-5 pt-3 backdrop-blur-xl sm:px-6 lg:hidden ${
+                        scrolled
+                            ? 'border-gray-200 bg-white/95'
+                            : 'border-white/10 bg-black/85'
+                    }`}
+                >
+                    <div className="mx-auto max-w-4xl">
+                        <div className="flex flex-col gap-4">
+                            {navLinks.map((link) => (
+                                <a
+                                    key={link.label}
+                                    href={link.href}
+                                    onClick={(e) => handleAnchorClick(e, link.href)}
+                                    className={`text-left text-sm font-medium ${
+                                        scrolled
+                                            ? 'text-gray-700 hover:text-gray-900'
+                                            : 'text-white/80 hover:text-white'
+                                    }`}
+                                >
+                                    {link.label}
+                                </a>
+                            ))}
+                        </div>
+                        <div className="mt-6 flex flex-col gap-2">
+                            {auth.user ? (
                                 <Button
                                     asChild
-                                    variant="outline"
-                                    className="w-full rounded-full border-white/20 bg-transparent font-semibold text-white hover:bg-white/5"
+                                    className={`w-full rounded-full font-medium ${
+                                        scrolled
+                                            ? 'bg-gray-900 text-white hover:bg-gray-800'
+                                            : 'bg-white text-gray-900 hover:bg-white/90'
+                                    }`}
                                 >
-                                    <Link href={login()}>Request a demo</Link>
+                                    <Link href={dashboard()}>Dashboard</Link>
                                 </Button>
-                                {canRegister && (
+                            ) : (
+                                <>
                                     <Button
                                         asChild
-                                        className="w-full rounded-full font-semibold text-black hover:bg-white/90"
+                                        variant="outline"
+                                        className={`w-full rounded-full font-medium ${
+                                            scrolled
+                                                ? 'border-gray-300 text-gray-800 hover:bg-gray-50'
+                                                : 'border-white/20 bg-transparent text-white hover:bg-white/10'
+                                        }`}
                                     >
-                                        <Link href={register()}>Sign up</Link>
+                                        <Link href={login()}>Request a demo</Link>
                                     </Button>
-                                )}
-                            </>
-                        )}
+                                    {canRegister && (
+                                        <Button
+                                            asChild
+                                            className={`w-full rounded-full font-medium ${
+                                                scrolled
+                                                    ? 'bg-gray-900 text-white hover:bg-gray-800'
+                                                    : 'bg-white text-gray-900 hover:bg-white/90'
+                                            }`}
+                                        >
+                                            <Link href={login()}>Get Started</Link>
+                                        </Button>
+                                    )}
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}
