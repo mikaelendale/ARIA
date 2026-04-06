@@ -11,9 +11,7 @@ export default function SocialProof() {
                 </p>
 
                 <div className="flex flex-wrap items-center justify-center gap-6 opacity-50 md:gap-10">
-                    <span className="text-xs font-medium tracking-widest text-white/60 uppercase">
-                        GPT-4o
-                    </span>
+
                     <span className="text-xs font-medium tracking-widest text-white/60 uppercase">
                         Twilio
                     </span>

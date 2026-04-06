@@ -96,9 +96,9 @@ const agents = [
                 <polyline points="17 6 23 6 23 12" />
             </svg>
         ),
-        accent: 'from-green-500/20 to-emerald-500/10',
-        border: 'border-green-500/10',
-        dot: 'bg-green-400',
+        accent: 'from-blue-500/20 to-sky-500/10',
+        border: 'border-blue-500/10',
+        dot: 'bg-blue-400',
     },
     {
         name: 'VERA',
