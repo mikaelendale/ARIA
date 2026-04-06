@@ -13,6 +13,7 @@ export interface DashboardStats extends PageProps {
     revenueImpactToday: number;
     pulseRevenueToday: number;
     queueSnapshot: QueueSnapshot;
+    incidentBanner?: string | null;
 }
 
 export type DashboardPageProps = DashboardStats;
@@ -38,6 +39,7 @@ function emptyStats(): DashboardStats {
         occupancyPercent: 0,
         revenueImpactToday: 0,
         pulseRevenueToday: 0,
+        incidentBanner: null,
         queueSnapshot: {
             connection: 'sync',
             pendingByQueue: {},
@@ -91,6 +93,10 @@ function normalizeQueueSnapshot(raw: unknown): DashboardStats['queueSnapshot'] {
 export function normalizeDashboardStats(raw: Partial<DashboardPageProps> | null | undefined): DashboardStats {
     const e = emptyStats();
 
+    const bannerRaw = raw?.incidentBanner;
+    const incidentBanner =
+        typeof bannerRaw === 'string' && bannerRaw.trim() !== '' ? bannerRaw.trim() : null;
+
     return {
         guests: asFiniteNumber(raw?.guests, 0),
         incidentsOpen: asFiniteNumber(raw?.incidentsOpen, 0),
@@ -102,6 +108,7 @@ export function normalizeDashboardStats(raw: Partial<DashboardPageProps> | null 
         revenueImpactToday: asFiniteNumber(raw?.revenueImpactToday, 0),
         pulseRevenueToday: asFiniteNumber(raw?.pulseRevenueToday, 0),
         queueSnapshot: normalizeQueueSnapshot(raw?.queueSnapshot),
+        incidentBanner,
     };
 }
 

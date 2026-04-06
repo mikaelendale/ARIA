@@ -14,12 +14,13 @@ import { DashboardOverview } from '@/components/dashboard/dashboard-overview';
 import { DashboardTourProvider, DashboardTourTrigger } from '@/components/dashboard/dashboard-tour';
 import { DemoScenariosPanel } from '@/components/dashboard/demo-scenarios-panel';
 import { LiveCounter } from '@/components/dashboard/live-counter';
+import { DashboardIncidentBanner } from '@/components/dashboard/dashboard-incident-banner';
 import { QueueOpsStrip } from '@/components/dashboard/queue-ops-strip';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useAgentStatus } from '@/hooks/useAgentStatus';
 import { useDashboardEvents } from '@/hooks/useDashboardEvents';
-import { useDashboardStats } from '@/hooks/useOpsQueries';
+import { normalizeDashboardStats, useDashboardStats } from '@/hooks/useOpsQueries';
 import type { DashboardPageProps } from '@/hooks/useOpsQueries';
 import AppLayout from '@/layouts/app-layout';
 import { consumeAriaChatSseStream } from '@/lib/aria-chat-stream';
@@ -178,6 +179,11 @@ export default function Dashboard() {
     const initialActions = statsQuery.data?.initialActions;
     const queueSnapshot = statsQuery.data?.queueSnapshot;
 
+    const incidentBanner =
+        statsQuery.data?.incidentBanner ??
+        normalizeDashboardStats(page.props).incidentBanner ??
+        null;
+
     const showAsideRail =
         vis.showDemoPanel || vis.showLiveFeed || vis.showSignalsColumn;
 
@@ -191,6 +197,8 @@ export default function Dashboard() {
                         chatUiOpen ? 'h-full min-h-0 overflow-hidden gap-0 py-0 md:pb-0' : 'pb-8',
                     )}
                 >
+                    {incidentBanner ? <DashboardIncidentBanner message={incidentBanner} /> : null}
+
                     {!chatUiOpen ? (
                         <>
                             {queueSnapshot ? (

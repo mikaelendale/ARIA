@@ -185,6 +185,8 @@ class OpsData
         $initialActions = self::actionFeedItems(20);
         $revenueToday = self::revenueImpactToday();
 
+        $banner = config('dashboard.incident_banner', '');
+
         return [
             'guests' => Guest::query()->count(),
             'incidentsOpen' => self::openIncidentsCount(),
@@ -196,6 +198,7 @@ class OpsData
             'revenueImpactToday' => $revenueToday,
             'pulseRevenueToday' => self::pulseRevenueImpactToday(),
             'queueSnapshot' => self::queueSnapshot(),
+            'incidentBanner' => is_string($banner) && trim($banner) !== '' ? trim($banner) : null,
         ];
     }
 
