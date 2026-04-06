@@ -14,7 +14,7 @@ use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Promptable;
 use Stringable;
 
-#[Provider(['gemini', 'gemini_secondary', 'groq'])]
+#[Provider(['gemini', 'gemini_secondary', 'groq', 'openai'])]
 #[UseCheapestModel]
 #[MaxSteps(10)]
 class PulsePricingAgent implements Agent, Conversational, HasTools

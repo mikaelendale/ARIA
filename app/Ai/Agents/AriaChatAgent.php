@@ -26,7 +26,7 @@ use Stringable;
  * In-dashboard conversational ARIA with **read-only** tools over {@see OpsData}
  * and guest/incident records. No side-effect tools (no messaging, pricing, or writes).
  */
-#[Provider(['gemini', 'gemini_secondary', 'groq'])]
+#[Provider(['gemini', 'gemini_secondary', 'groq', 'openai'])]
 #[UseCheapestModel]
 #[MaxSteps(12)]
 class AriaChatAgent implements Agent, Conversational, HasTools

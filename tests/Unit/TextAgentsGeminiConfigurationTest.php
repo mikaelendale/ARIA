@@ -13,12 +13,12 @@ use ReflectionClass;
 use Tests\TestCase;
 
 /**
- * Ensures Promptable text agents keep a stable provider failover chain (Gemini → Gemini secondary → Groq).
+ * Ensures Promptable text agents keep a stable provider failover chain (Gemini → secondary → Groq → OpenAI).
  */
 class TextAgentsGeminiConfigurationTest extends TestCase
 {
     /** @var list<string> */
-    private const EXPECTED_PROVIDER_FAILOVER = ['gemini', 'gemini_secondary', 'groq'];
+    private const EXPECTED_PROVIDER_FAILOVER = ['gemini', 'gemini_secondary', 'groq', 'openai'];
 
     /**
      * @return list<class-string>
@@ -34,7 +34,7 @@ class TextAgentsGeminiConfigurationTest extends TestCase
     }
 
     #[Test]
-    public function text_agents_use_gemini_then_groq_failover_and_cheapest_model(): void
+    public function text_agents_use_full_provider_failover_chain_and_cheapest_model(): void
     {
         foreach ($this->promptableTextAgentClasses() as $class) {
             $ref = new ReflectionClass($class);

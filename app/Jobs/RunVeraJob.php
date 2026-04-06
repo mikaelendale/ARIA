@@ -3,6 +3,8 @@
 namespace App\Jobs;
 
 use App\Ai\Agents\VeraAgent;
+use App\Jobs\Concerns\ProvidesAiTransientQueueRetryPolicy;
+use App\Jobs\Concerns\ReleasesOnAiTransientFailure;
 use App\Models\Guest;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -14,7 +16,9 @@ class RunVeraJob implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
+    use ProvidesAiTransientQueueRetryPolicy;
     use Queueable;
+    use ReleasesOnAiTransientFailure;
     use SerializesModels;
 
     public function __construct(public string $guestId)
@@ -29,6 +33,6 @@ class RunVeraJob implements ShouldQueue
             return;
         }
 
-        app(VeraAgent::class)->updateScore($guest);
+        $this->invokeWithAiTransientRetry(fn () => app(VeraAgent::class)->updateScore($guest));
     }
 }

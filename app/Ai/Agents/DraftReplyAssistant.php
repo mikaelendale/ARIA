@@ -12,7 +12,7 @@ use Stringable;
 /**
  * Minimal agent used by DraftReply tool; fake this class in tests via Ai::fake()->fakeAgent(...).
  */
-#[Provider(['gemini', 'gemini_secondary', 'groq'])]
+#[Provider(['gemini', 'gemini_secondary', 'groq', 'openai'])]
 #[UseCheapestModel]
 class DraftReplyAssistant implements Agent, Conversational
 {

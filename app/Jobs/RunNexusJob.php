@@ -3,6 +3,8 @@
 namespace App\Jobs;
 
 use App\Ai\Agents\NexusAgent;
+use App\Jobs\Concerns\ProvidesAiTransientQueueRetryPolicy;
+use App\Jobs\Concerns\ReleasesOnAiTransientFailure;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -13,7 +15,9 @@ class RunNexusJob implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
+    use ProvidesAiTransientQueueRetryPolicy;
     use Queueable;
+    use ReleasesOnAiTransientFailure;
     use SerializesModels;
 
     /**
@@ -26,6 +30,6 @@ class RunNexusJob implements ShouldQueue
 
     public function handle(): void
     {
-        app(NexusAgent::class)->run($this->event);
+        $this->invokeWithAiTransientRetry(fn () => app(NexusAgent::class)->run($this->event));
     }
 }
