@@ -5,6 +5,8 @@ namespace App\Ai\Agents;
 use App\Ai\Tools\AdjustPricing;
 use App\Ai\Tools\SendPromo;
 use Laravel\Ai\Attributes\MaxSteps;
+use Laravel\Ai\Attributes\Provider;
+use Laravel\Ai\Attributes\UseCheapestModel;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
 use Laravel\Ai\Contracts\HasTools;
@@ -12,6 +14,8 @@ use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Promptable;
 use Stringable;
 
+#[Provider(['gemini', 'gemini_secondary', 'groq'])]
+#[UseCheapestModel]
 #[MaxSteps(10)]
 class PulsePricingAgent implements Agent, Conversational, HasTools
 {

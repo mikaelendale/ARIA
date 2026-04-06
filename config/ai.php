@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => 'openai',
+    'default' => 'gemini',
     'default_for_images' => 'gemini',
     'default_for_audio' => 'openai',
     'default_for_transcription' => 'openai',
@@ -82,11 +82,34 @@ return [
         'gemini' => [
             'driver' => 'gemini',
             'key' => env('GEMINI_API_KEY'),
+            'models' => [
+                'text' => [
+                    'cheapest' => env('GEMINI_TEXT_MODEL'),
+                    'default' => env('GEMINI_TEXT_MODEL_DEFAULT'),
+                ],
+            ],
+        ],
+
+        'gemini_secondary' => [
+            'driver' => 'gemini',
+            'key' => env('GEMINI_API_KEY_SECONDARY'),
+            'models' => [
+                'text' => [
+                    'cheapest' => env('GEMINI_TEXT_MODEL'),
+                    'default' => env('GEMINI_TEXT_MODEL_DEFAULT'),
+                ],
+            ],
         ],
 
         'groq' => [
             'driver' => 'groq',
             'key' => env('GROQ_API_KEY'),
+            'models' => [
+                'text' => [
+                    'cheapest' => env('GROQ_TEXT_MODEL'),
+                    'default' => env('GROQ_TEXT_MODEL_DEFAULT'),
+                ],
+            ],
         ],
 
         'jina' => [
