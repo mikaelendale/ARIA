@@ -3,13 +3,12 @@ import { login } from '@/routes';
 import { ArrowRight } from '@phosphor-icons/react';
 
 const footerLinks = {
-    Product: ['Agents', 'Dashboard', 'Integrations', 'API'],
-    Solutions: ['Hotels', 'Resorts', 'Boutique Stays', 'Enterprise'],
-    Resources: ['Documentation', 'Case Studies', 'Blog', 'Support'],
-    Company: ['About', 'Careers', 'Contact', 'Press'],
+    Product: ['Agents', 'Dashboard'],
+    Resources: ['Documentation', 'Support'],
+    Company: ['About', 'Contact'],
 };
 
-const techStack = ['GPT-4o', 'Laravel', 'Twilio', 'WhatsApp', 'Reverb'];
+const techStack = ['Laravel', 'Twilio', 'WhatsApp', 'Reverb'];
 
 export default function Footer() {
     return (
@@ -23,7 +22,7 @@ export default function Footer() {
                     <div>
                         <h3 className="text-2xl font-medium tracking-tight sm:text-3xl md:text-4xl">
                             Ready to automate{' '}
-                            <span className="text-emerald-400">your hotel?</span>
+                            <span className="text-blue-400">your hotel?</span>
                         </h3>
                         <p className="mt-3 max-w-md text-sm leading-relaxed text-white/50 md:text-base">
                             See how ARIA can reduce guest wait times, boost
@@ -97,24 +96,11 @@ export default function Footer() {
                     <p className="text-xs text-white/30">
                         © {new Date().getFullYear()} ARIA. All rights reserved.
                     </p>
-
-                    <div className="flex items-center gap-6">
-                        <button className="text-xs text-white/30 transition-colors hover:text-white/60">
-                            Privacy Policy
-                        </button>
-                        <button className="text-xs text-white/30 transition-colors hover:text-white/60">
-                            Terms of Service
-                        </button>
-                        <button className="text-xs text-white/30 transition-colors hover:text-white/60">
-                            Cookie Settings
-                        </button>
-                    </div>
-
                     {/* Status indicator */}
                     <div className="flex items-center gap-2">
                         <span className="relative flex h-2 w-2">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-                            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-500 opacity-75" />
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-400" />
                         </span>
                         <span className="text-[10px] font-medium tracking-wider text-white/40 uppercase">
                             All systems operational

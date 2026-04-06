@@ -21,12 +21,12 @@ export default function AboutSection() {
                             ease: [0.22, 1, 0.36, 1],
                         }}
                     >
-                        <span className="mb-4 inline-block rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-xs font-semibold tracking-widest text-emerald-700 uppercase">
+                        <span className="mb-4 inline-block rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-semibold tracking-widest text-blue-700 uppercase">
                             About us
                         </span>
                         <h2 className="mt-4 text-3xl font-medium tracking-tight text-gray-900 sm:text-4xl md:text-5xl lg:text-[3.5rem] lg:leading-[1.1]">
                             Built with experts{' '}
-                            <span className="text-emerald-700">
+                            <span className="text-blue-700">
                                 for real-world hospitality
                             </span>
                         </h2>
@@ -98,7 +98,7 @@ export default function AboutSection() {
                                     delay: 0.1 * i,
                                     ease: [0.22, 1, 0.36, 1],
                                 }}
-                                className="rounded-2xl border border-gray-100 bg-gray-50/60 p-6 transition-all duration-300 hover:border-emerald-200 hover:bg-emerald-50/40 hover:shadow-md"
+                                className="rounded-2xl border border-gray-100 bg-gray-50/60 p-6 transition-all duration-300 hover:border-blue-200 hover:bg-blue-50/40 hover:shadow-md"
                             >
                                 <span className="text-2xl">{feature.emoji}</span>
                                 <h3 className="mt-3 text-sm font-medium tracking-tight text-gray-900">

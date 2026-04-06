@@ -65,11 +65,11 @@ const agents = [
         description:
             'Adjusts pricing based on demand, pushes upsells at the perfect moment, and generates flash promotions autonomously.',
         icon: <TrendingUp {...iconBase} />,
-        color: '#10B981',
-        bgAccent: 'bg-emerald-50',
-        borderAccent: 'hover:border-emerald-200',
-        iconBg: 'bg-emerald-100',
-        iconColor: 'text-emerald-600',
+        color: '#3B82F6',
+        bgAccent: 'bg-blue-50',
+        borderAccent: 'hover:border-blue-200',
+        iconBg: 'bg-blue-100',
+        iconColor: 'text-blue-600',
         tag: 'Revenue optimizer',
     },
     {
@@ -142,8 +142,8 @@ export default function AgentsShowcase({ variant = 'default' }: AgentsShowcasePr
         >
             {!isHero && (
                 <>
-                    <div className="pointer-events-none absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-emerald-50/60 blur-[120px]" />
-                    <div className="pointer-events-none absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-violet-50/40 blur-[100px]" />
+                    <div className="pointer-events-none absolute top-0 right-0 h-[500px] w-[500px] rounded-full bg-blue-50/60 blur-[120px]" />
+                    <div className="pointer-events-none absolute bottom-0 left-0 h-[400px] w-[400px] rounded-full bg-indigo-50/40 blur-[100px]" />
                 </>
             )}
 
@@ -165,7 +165,7 @@ export default function AgentsShowcase({ variant = 'default' }: AgentsShowcasePr
                             'mb-4 inline-block rounded-full border px-4 py-1.5 text-xs font-medium tracking-widest uppercase',
                             isHero
                                 ? 'border-white/15 bg-white/[0.06] text-white/70'
-                                : 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                                : 'border-blue-200 bg-blue-50 text-blue-700',
                         )}
                     >
                         Meet the agents
@@ -181,7 +181,7 @@ export default function AgentsShowcase({ variant = 'default' }: AgentsShowcasePr
                         One brain.{' '}
                         <span
                             className={
-                                isHero ? 'text-emerald-300/95' : 'text-emerald-700'
+                                isHero ? 'text-blue-400/95' : 'text-blue-700'
                             }
                         >
                             Six specialists.

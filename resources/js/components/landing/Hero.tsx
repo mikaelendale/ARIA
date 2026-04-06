@@ -41,7 +41,7 @@ const agents = [
         role: 'Revenue',
         line: 'Modifies pricing thresholds and pushes targeted upsells seamlessly.',
         icon: <TrendUp weight="duotone" size={20} />,
-        accent: '#10B981',
+        accent: '#3B82F6',
     },
     {
         name: 'VERA',
@@ -79,7 +79,7 @@ export default function Hero({
                 <Suspense
                     fallback={
                         <div className="absolute inset-0 flex items-center justify-center bg-[#030303]">
-                            <div className="h-48 w-48 rounded-full bg-emerald-500/5 blur-[100px] animate-pulse" />
+                            <div className="h-48 w-48 rounded-full bg-blue-500/5 blur-[100px] animate-pulse" />
                         </div>
                     }
                 >
@@ -113,20 +113,20 @@ export default function Hero({
                                 {/* Pill badge */}
                                 <div className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-white/[0.08] bg-white/[0.04] px-4 py-2 backdrop-blur-sm">
                                     <span className="relative flex h-1.5 w-1.5">
-                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
+                                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-blue-400" />
                                     </span>
                                     <span className="text-[11px] font-medium tracking-[0.2em] text-white/60 uppercase">
-                                        6 agents · Always on
+                                        Autonomous Resort Intelligence Agent · 6 Specialists
                                     </span>
                                 </div>
 
                                 {/* Headline — editorial, clean */}
                                 <h1 className="text-[clamp(2.25rem,5vw,4.5rem)] font-semibold leading-[1.08] tracking-[-0.035em] text-white">
-                                    The AI that
+                                    Meet ARIA. The AI
                                     <br />
-                                    <span className="bg-gradient-to-r from-emerald-300 via-emerald-200 to-teal-300 bg-clip-text text-transparent">
-                                        runs your hotel
+                                    <span className="bg-gradient-to-r from-blue-400 via-sky-300 to-blue-500 bg-clip-text text-transparent">
+                                        that runs your hotel
                                     </span>
                                 </h1>
 
