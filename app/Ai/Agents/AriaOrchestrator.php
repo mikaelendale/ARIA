@@ -2,6 +2,7 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Support\ConfiguredTextProviderFailover;
 use App\Ai\Tools\AdjustPricing;
 use App\Ai\Tools\AlertManager;
 use App\Ai\Tools\ApplyDiscount;
@@ -41,6 +42,14 @@ class AriaOrchestrator implements Agent, Conversational, HasTools
         protected SendPromo $sendPromo,
         protected EscalateToHuman $escalateToHuman,
     ) {}
+
+    /**
+     * @return list<string>
+     */
+    public function provider(): array
+    {
+        return ConfiguredTextProviderFailover::providers();
+    }
 
     public function instructions(): Stringable|string
     {

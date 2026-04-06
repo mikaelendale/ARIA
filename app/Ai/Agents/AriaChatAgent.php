@@ -2,6 +2,7 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Support\ConfiguredTextProviderFailover;
 use App\Ai\Tools\GetGuestDetail;
 use App\Ai\Tools\GetIncidentDetail;
 use App\Ai\Tools\ListGuests;
@@ -44,6 +45,14 @@ class AriaChatAgent implements Agent, Conversational, HasTools
         protected ListIncidents $listIncidents,
         protected GetIncidentDetail $getIncidentDetail,
     ) {}
+
+    /**
+     * @return list<string>
+     */
+    public function provider(): array
+    {
+        return ConfiguredTextProviderFailover::providers();
+    }
 
     public function instructions(): Stringable|string
     {

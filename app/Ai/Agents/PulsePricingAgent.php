@@ -2,6 +2,7 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Support\ConfiguredTextProviderFailover;
 use App\Ai\Tools\AdjustPricing;
 use App\Ai\Tools\SendPromo;
 use Laravel\Ai\Attributes\MaxSteps;
@@ -25,6 +26,14 @@ class PulsePricingAgent implements Agent, Conversational, HasTools
         protected AdjustPricing $adjustPricing,
         protected SendPromo $sendPromo,
     ) {}
+
+    /**
+     * @return list<string>
+     */
+    public function provider(): array
+    {
+        return ConfiguredTextProviderFailover::providers();
+    }
 
     public function instructions(): Stringable|string
     {

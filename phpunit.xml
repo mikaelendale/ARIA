@@ -32,5 +32,10 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <!-- Non-secret placeholders so provider() failover stays full-length under Ai::fake(); not used for real HTTP in CI. -->
+        <env name="GEMINI_API_KEY" value="phpunit-placeholder"/>
+        <env name="GEMINI_API_KEY_SECONDARY" value="phpunit-placeholder"/>
+        <env name="GROQ_API_KEY" value="phpunit-placeholder"/>
+        <env name="OPENAI_API_KEY" value="phpunit-placeholder"/>
     </php>
 </phpunit>

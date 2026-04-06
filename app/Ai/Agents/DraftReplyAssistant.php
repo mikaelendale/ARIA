@@ -2,6 +2,7 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Support\ConfiguredTextProviderFailover;
 use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\UseCheapestModel;
 use Laravel\Ai\Contracts\Agent;
@@ -17,6 +18,14 @@ use Stringable;
 class DraftReplyAssistant implements Agent, Conversational
 {
     use Promptable;
+
+    /**
+     * @return list<string>
+     */
+    public function provider(): array
+    {
+        return ConfiguredTextProviderFailover::providers();
+    }
 
     public function instructions(): Stringable|string
     {
