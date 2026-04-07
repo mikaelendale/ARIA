@@ -2,6 +2,15 @@
 
 return [
 
+    /*
+    | When false (default), RunSentinelJob / RunEchoJob / RunPulseJob are not registered on the
+    | scheduler — avoids automatic AI calls; use dashboard/API triggers or manual dispatch instead.
+    */
+    'enable_scheduled_ai_jobs' => filter_var(
+        env('ARIA_ENABLE_SCHEDULED_AI_JOBS', false),
+        FILTER_VALIDATE_BOOLEAN,
+    ),
+
     'demo_triggers_enabled' => (bool) env('ARIA_DEMO_TRIGGERS', false),
 
     /*

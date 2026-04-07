@@ -11,6 +11,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::job(new RunSentinelJob)->everyMinute();
-Schedule::job(new RunEchoJob)->everyThirtyMinutes();
-Schedule::job(new RunPulseJob)->hourly();
+if (config('aria.enable_scheduled_ai_jobs')) {
+    Schedule::job(new RunSentinelJob)->everyMinute();
+    Schedule::job(new RunEchoJob)->everyThirtyMinutes();
+    Schedule::job(new RunPulseJob)->hourly();
+}

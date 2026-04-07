@@ -140,14 +140,14 @@ class PhaseSevenJobsTest extends TestCase
         $job->handle();
     }
 
-    public function test_schedule_lists_phase_seven_jobs(): void
+    public function test_schedule_does_not_register_ai_jobs_by_default(): void
     {
         Artisan::call('schedule:list');
         $output = Artisan::output();
 
-        $this->assertStringContainsString(RunSentinelJob::class, $output);
-        $this->assertStringContainsString(RunEchoJob::class, $output);
-        $this->assertStringContainsString(RunPulseJob::class, $output);
+        $this->assertStringNotContainsString(RunSentinelJob::class, $output);
+        $this->assertStringNotContainsString(RunEchoJob::class, $output);
+        $this->assertStringNotContainsString(RunPulseJob::class, $output);
     }
 
     protected function tearDown(): void
