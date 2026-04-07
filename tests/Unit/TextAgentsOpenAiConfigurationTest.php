@@ -6,8 +6,10 @@ use App\Ai\Agents\AriaChatAgent;
 use App\Ai\Agents\AriaOrchestrator;
 use App\Ai\Agents\DraftReplyAssistant;
 use App\Ai\Agents\PulsePricingAgent;
+use App\Ai\OpenAiTextDefaults;
 use App\Ai\Support\ConfiguredTextProviderFailover;
 use Illuminate\Support\Facades\Config;
+use Laravel\Ai\Attributes\Model;
 use Laravel\Ai\Attributes\Provider;
 use PHPUnit\Framework\Attributes\Test;
 use ReflectionClass;
@@ -44,6 +46,15 @@ class TextAgentsOpenAiConfigurationTest extends TestCase
             $this->assertNotEmpty($providerAttrs, $class.' should declare #[Provider]');
             $provider = $providerAttrs[0]->newInstance();
             $this->assertSame(self::EXPECTED_PROVIDER_FAILOVER, $provider->value, $class.' should use OpenAI only');
+
+            $modelAttrs = $ref->getAttributes(Model::class);
+            $this->assertNotEmpty($modelAttrs, $class.' should declare #[Model] per Laravel AI SDK (ai-sdk.md Agent Configuration)');
+            $modelAttr = $modelAttrs[0]->newInstance();
+            $this->assertSame(
+                OpenAiTextDefaults::TEXT_MODEL_ID,
+                $modelAttr->value,
+                $class.' #[Model] should match gpt-5-nano default',
+            );
 
             $this->assertTrue($ref->hasMethod('provider'), $class.' should implement provider() for key-aware failover');
             $this->assertTrue($ref->hasMethod('model'), $class.' should implement model() for OpenAI text model');
@@ -87,5 +98,15 @@ class TextAgentsOpenAiConfigurationTest extends TestCase
         $this->assertArrayHasKey('text', $openai['models']);
         $this->assertArrayHasKey('cheapest', $openai['models']['text']);
         $this->assertArrayHasKey('default', $openai['models']['text']);
+        $this->assertSame(
+            OpenAiTextDefaults::TEXT_MODEL_ID,
+            $openai['models']['text']['cheapest'],
+            'config cheapest default must match OpenAiTextDefaults::TEXT_MODEL_ID',
+        );
+        $this->assertSame(
+            OpenAiTextDefaults::TEXT_MODEL_ID,
+            $openai['models']['text']['default'],
+            'config default must match OpenAiTextDefaults::TEXT_MODEL_ID when env unset',
+        );
     }
 }

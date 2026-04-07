@@ -134,7 +134,7 @@ return [
             'url' => env('OPENAI_BASE_URL'),
             'models' => [
                 'text' => [
-                    'cheapest' => env('OPENAI_TEXT_MODEL', 'gpt-5-nano'),
+                    'cheapest' => env('OPENAI_TEXT_MODEL', 'gpt-5-nano'), // keep default in sync with App\Ai\OpenAiTextDefaults::TEXT_MODEL_ID
                     'default' => env('OPENAI_TEXT_MODEL_DEFAULT', env('OPENAI_TEXT_MODEL', 'gpt-5-nano')),
                 ],
             ],

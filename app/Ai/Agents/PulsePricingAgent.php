@@ -3,10 +3,12 @@
 namespace App\Ai\Agents;
 
 use App\Ai\Concerns\ResolvesOpenAiTextModel;
+use App\Ai\OpenAiTextDefaults;
 use App\Ai\Support\ConfiguredTextProviderFailover;
 use App\Ai\Tools\AdjustPricing;
 use App\Ai\Tools\SendPromo;
 use Laravel\Ai\Attributes\MaxSteps;
+use Laravel\Ai\Attributes\Model;
 use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
@@ -16,6 +18,7 @@ use Laravel\Ai\Promptable;
 use Stringable;
 
 #[Provider(['openai'])]
+#[Model(OpenAiTextDefaults::TEXT_MODEL_ID)]
 #[MaxSteps(10)]
 class PulsePricingAgent implements Agent, Conversational, HasTools
 {

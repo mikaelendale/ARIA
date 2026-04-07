@@ -3,7 +3,9 @@
 namespace App\Ai\Agents;
 
 use App\Ai\Concerns\ResolvesOpenAiTextModel;
+use App\Ai\OpenAiTextDefaults;
 use App\Ai\Support\ConfiguredTextProviderFailover;
+use Laravel\Ai\Attributes\Model;
 use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
@@ -14,6 +16,7 @@ use Stringable;
  * Minimal agent used by DraftReply tool; fake this class in tests via Ai::fake()->fakeAgent(...).
  */
 #[Provider(['openai'])]
+#[Model(OpenAiTextDefaults::TEXT_MODEL_ID)]
 class DraftReplyAssistant implements Agent, Conversational
 {
     use Promptable;

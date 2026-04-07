@@ -3,6 +3,7 @@
 namespace App\Ai\Agents;
 
 use App\Ai\Concerns\ResolvesOpenAiTextModel;
+use App\Ai\OpenAiTextDefaults;
 use App\Ai\Support\ConfiguredTextProviderFailover;
 use App\Ai\Tools\GetGuestDetail;
 use App\Ai\Tools\GetIncidentDetail;
@@ -14,6 +15,7 @@ use App\Ai\Tools\ReadQueueHealth;
 use App\Ai\Tools\ReadRecentAgentActions;
 use App\Support\OpsData;
 use Laravel\Ai\Attributes\MaxSteps;
+use Laravel\Ai\Attributes\Model;
 use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
@@ -28,6 +30,7 @@ use Stringable;
  * and guest/incident records. No side-effect tools (no messaging, pricing, or writes).
  */
 #[Provider(['openai'])]
+#[Model(OpenAiTextDefaults::TEXT_MODEL_ID)]
 #[MaxSteps(12)]
 class AriaChatAgent implements Agent, Conversational, HasTools
 {

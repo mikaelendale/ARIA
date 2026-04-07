@@ -2,8 +2,14 @@
 
 namespace App\Ai\Concerns;
 
+use App\Ai\OpenAiTextDefaults;
+use Laravel\Ai\Attributes\Model;
+use Laravel\Ai\Attributes\Provider;
+
 /**
- * Resolves the OpenAI text model from {@see config('ai.php')} providers.openai.models.text.
+ * OpenAI text model for all Promptable agents. Matches Laravel AI SDK “Agent Configuration” in ai-sdk.md
+ * ({@see Model} + {@see Provider}).
+ * Runtime ID: {@see config('ai.providers.openai.models.text')}; fallback {@see OpenAiTextDefaults::TEXT_MODEL_ID}.
  */
 trait ResolvesOpenAiTextModel
 {
@@ -18,6 +24,6 @@ trait ResolvesOpenAiTextModel
             $resolved = trim($cheapest);
         }
 
-        return $resolved ?? 'gpt-5-nano';
+        return $resolved ?? OpenAiTextDefaults::TEXT_MODEL_ID;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Ai\Agents;
 
 use App\Ai\Concerns\ResolvesOpenAiTextModel;
+use App\Ai\OpenAiTextDefaults;
 use App\Ai\Support\ConfiguredTextProviderFailover;
 use App\Ai\Tools\AdjustPricing;
 use App\Ai\Tools\AlertManager;
@@ -15,6 +16,7 @@ use App\Ai\Tools\PingKitchen;
 use App\Ai\Tools\SendPromo;
 use App\Ai\Tools\SendWhatsapp;
 use Laravel\Ai\Attributes\MaxSteps;
+use Laravel\Ai\Attributes\Model;
 use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
@@ -24,6 +26,7 @@ use Laravel\Ai\Promptable;
 use Stringable;
 
 #[Provider(['openai'])]
+#[Model(OpenAiTextDefaults::TEXT_MODEL_ID)]
 #[MaxSteps(15)]
 class AriaOrchestrator implements Agent, Conversational, HasTools
 {
