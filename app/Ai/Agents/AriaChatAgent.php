@@ -2,6 +2,7 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\ResolvesOpenAiTextModel;
 use App\Ai\Support\ConfiguredTextProviderFailover;
 use App\Ai\Tools\GetGuestDetail;
 use App\Ai\Tools\GetIncidentDetail;
@@ -14,7 +15,6 @@ use App\Ai\Tools\ReadRecentAgentActions;
 use App\Support\OpsData;
 use Laravel\Ai\Attributes\MaxSteps;
 use Laravel\Ai\Attributes\Provider;
-use Laravel\Ai\Attributes\UseCheapestModel;
 use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
@@ -27,13 +27,13 @@ use Stringable;
  * In-dashboard conversational ARIA with **read-only** tools over {@see OpsData}
  * and guest/incident records. No side-effect tools (no messaging, pricing, or writes).
  */
-#[Provider(['gemini', 'gemini_secondary', 'groq', 'openai'])]
-#[UseCheapestModel]
+#[Provider(['openai'])]
 #[MaxSteps(12)]
 class AriaChatAgent implements Agent, Conversational, HasTools
 {
     use Promptable;
     use RemembersConversations;
+    use ResolvesOpenAiTextModel;
 
     public function __construct(
         protected ReadDashboardSummary $readDashboardSummary,

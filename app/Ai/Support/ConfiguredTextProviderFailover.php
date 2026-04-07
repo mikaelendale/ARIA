@@ -3,13 +3,13 @@
 namespace App\Ai\Support;
 
 /**
- * Text agents use a fixed failover order, but providers without a configured API key must be
- * skipped — otherwise the last hop (e.g. OpenAI) sends requests with no Bearer token and returns 401.
+ * Text agents use OpenAI only; providers without a configured API key are skipped so requests are
+ * not sent with an empty Bearer token (401).
  */
 final class ConfiguredTextProviderFailover
 {
     /** @var list<string> */
-    public const DEFAULT_CHAIN = ['gemini', 'gemini_secondary', 'groq', 'openai'];
+    public const DEFAULT_CHAIN = ['openai'];
 
     /**
      * @return list<string>

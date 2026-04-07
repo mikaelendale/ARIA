@@ -1,7 +1,8 @@
 import { Head } from '@inertiajs/react';
 import AboutSection from '@/components/landing/AboutSection';
 import AgentsShowcase from '@/components/landing/AgentsShowcase';
-import Background from '@/components/landing/Background';
+import AriaHighlightCards from '@/components/landing/AriaHighlightCards';
+import AriaSystemHero from '@/components/landing/AriaSystemHero';
 import Footer from '@/components/landing/Footer';
 import Navbar from '@/components/landing/Navbar';
 import StatsSection from '@/components/landing/StatsSection';
@@ -13,7 +14,7 @@ export default function Welcome({
 }) {
     return (
         <div
-            className="min-h-screen bg-black text-white antialiased"
+            className="min-h-screen bg-background text-foreground antialiased"
             style={{ fontFamily: "'DM Sans', sans-serif" }}
         >
             <Head title="ARIA — Autonomous Resort Intelligence Agent">
@@ -24,23 +25,22 @@ export default function Welcome({
                     crossOrigin="anonymous"
                 />
                 <link
-                    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap"
+                    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap"
                     rel="stylesheet"
                 />
                 <meta
                     name="description"
-                    content="ARIA is the autonomous AI system that monitors every signal, resolves issues before guests notice, and drives revenue — in real time."
+                    content="ARIA is Kuriftu Resort's always-on Autonomous Resort Intelligence Agent: she runs the hotel—monitoring, deciding, and acting across WhatsApp, voice, and ops before you're asked."
                 />
             </Head>
 
-            <Background />
-            <Navbar canRegister={canRegister} />
+            <Navbar canRegister={canRegister} variant="light" />
 
-            {/* Hero: agents showcase over video background */}
-            <AgentsShowcase variant="hero" />
-
-            <StatsSection />
-            <AboutSection />
+            <AriaSystemHero canRegister={canRegister} />
+            <AriaHighlightCards />
+            <AgentsShowcase />
+            {/* <StatsSection /> */}
+            {/* <AboutSection /> */}
             <Footer />
         </div>
     );

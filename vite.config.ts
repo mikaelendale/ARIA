@@ -16,6 +16,9 @@ export default defineConfig({
             refresh: true,
         }),
         react({
+            // Wayfinder-generated route modules are plain TS (no React); React Compiler
+            // must not transform them or imports like `queryParams` can break at runtime.
+            exclude: [/\/node_modules\//, /resources[\\/]js[\\/]routes\//],
             babel: {
                 plugins: ['babel-plugin-react-compiler'],
             },

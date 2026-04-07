@@ -13,8 +13,8 @@ return [
     |
     */
 
-    'default' => 'gemini',
-    'default_for_images' => 'gemini',
+    'default' => 'openai',
+    'default_for_images' => 'openai',
     'default_for_audio' => 'openai',
     'default_for_transcription' => 'openai',
     'default_for_embeddings' => 'openai',
@@ -132,6 +132,12 @@ return [
             'driver' => 'openai',
             'key' => env('OPENAI_API_KEY'),
             'url' => env('OPENAI_BASE_URL'),
+            'models' => [
+                'text' => [
+                    'cheapest' => env('OPENAI_TEXT_MODEL', 'gpt-5-nano'),
+                    'default' => env('OPENAI_TEXT_MODEL_DEFAULT', env('OPENAI_TEXT_MODEL', 'gpt-5-nano')),
+                ],
+            ],
         ],
 
         'openrouter' => [
