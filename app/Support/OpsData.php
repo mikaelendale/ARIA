@@ -26,7 +26,7 @@ class OpsData
                 'id' => $action->id,
                 'agent' => strtolower((string) $action->agent_name),
                 'tool' => $action->tool_called,
-                'message' => (string) $action->result,
+                'message' => AgentActionFeedMessage::forFeed($action),
                 'timestamp' => optional($action->fired_at)?->toIso8601String() ?? now()->toIso8601String(),
                 'revenueImpact' => (float) $action->revenue_impact,
             ])
