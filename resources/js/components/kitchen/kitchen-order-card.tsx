@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Progress } from '@/components/ui/progress';
 import { friendlyAgentName } from '@/lib/aria-agent-copy';
-import { formatTimeAgo } from '@/lib/formatters';
+import { formatTimeAgo, formatWaitDuration } from '@/lib/formatters';
 import { cn } from '@/lib/utils';
 import type { KitchenOrder } from '@/types/kitchen';
 import { delivered } from '@/routes/kitchen/orders';
@@ -39,7 +39,8 @@ export function KitchenOrderCard({ order }: { order: KitchenOrder }) {
     const [detailsOpen, setDetailsOpen] = useState(false);
     const [busy, setBusy] = useState(false);
     const style = attentionStyles[order.attention] ?? attentionStyles.standard;
-    const wait = order.waitMinutes ?? 0;
+    const waitRaw = order.waitMinutes ?? 0;
+    const wait = Number.isFinite(waitRaw) ? Math.round(waitRaw) : 0;
     const sla = Math.max(1, order.sentinelDelayMinutes);
     const progressValue = Math.min(100, Math.round((wait / sla) * 100));
 
@@ -73,7 +74,7 @@ export function KitchenOrderCard({ order }: { order: KitchenOrder }) {
                     </div>
                     <div className="shrink-0 text-right">
                         <p className="text-muted-foreground text-[10px] uppercase tracking-wide">Waiting</p>
-                        <p className="text-foreground text-lg font-semibold tabular-nums">{order.waitMinutes ?? '—'}′</p>
+                        <p className="text-foreground text-lg font-semibold tabular-nums">{formatWaitDuration(order.waitMinutes)}</p>
                     </div>
                 </div>
 

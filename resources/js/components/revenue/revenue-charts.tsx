@@ -5,6 +5,7 @@ import {
     BarChart,
     CartesianGrid,
     Cell,
+    ReferenceDot,
     Tooltip,
     XAxis,
     YAxis,
@@ -40,7 +41,7 @@ type AreaProps = {
 
 export function RevenueTrendChart({ data, currency }: AreaProps) {
     return (
-        <ChartContainer>
+        <ChartContainer className="min-h-[220px]">
             <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                 <defs>
                     <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
@@ -84,8 +85,21 @@ export function RevenueTrendChart({ data, currency }: AreaProps) {
                     strokeWidth={2}
                     fill="url(#revenueFill)"
                     dot={false}
-                    activeDot={{ r: 4, fill: 'var(--chart-1)' }}
+                    activeDot={{ r: 5, fill: 'var(--chart-1)', stroke: 'var(--background)', strokeWidth: 2 }}
                 />
+                {data.map((row) =>
+                    row.event ? (
+                        <ReferenceDot
+                            key={row.date}
+                            x={row.shortLabel}
+                            y={row.revenue}
+                            r={5}
+                            fill="var(--chart-4)"
+                            stroke="var(--background)"
+                            strokeWidth={2}
+                        />
+                    ) : null,
+                )}
             </AreaChart>
         </ChartContainer>
     );

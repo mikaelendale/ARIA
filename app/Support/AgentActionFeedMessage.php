@@ -13,6 +13,14 @@ final class AgentActionFeedMessage
 {
     public static function forFeed(AgentAction $action): string
     {
+        return PublicMessageSanitizer::forDisplay(self::rawForFeed($action));
+    }
+
+    /**
+     * Human-readable line before {@see PublicMessageSanitizer} (tests may assert on raw shape).
+     */
+    public static function rawForFeed(AgentAction $action): string
+    {
         $tool = (string) $action->tool_called;
         $result = trim((string) $action->result);
         $payload = is_array($action->payload) ? $action->payload : [];

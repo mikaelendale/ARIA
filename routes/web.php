@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\GuestKioskWhatsappController;
 use App\Http\Controllers\GuestVoiceController;
+use App\Http\Controllers\HermesVoiceController;
 use App\Http\Controllers\IncidentController;
 use App\Http\Controllers\KitchenBoardController;
 use App\Http\Controllers\RevenueController;
@@ -25,6 +26,14 @@ Route::inertia('/', 'welcome', [
 
 /** Public guest-facing Hermes kiosk (no app chrome): voice orb + WhatsApp send channel when configured */
 Route::get('/guest/voice', GuestVoiceController::class)->name('guest.voice');
+
+/** Hermes browser-based voice API — public, rate-limited per IP */
+Route::prefix('api/hermes')->middleware('throttle:30,1')->group(function () {
+    Route::post('transcribe', [HermesVoiceController::class, 'transcribe'])->name('api.hermes.transcribe');
+    Route::post('respond', [HermesVoiceController::class, 'respond'])->name('api.hermes.respond');
+    Route::post('speak', [HermesVoiceController::class, 'speak'])->name('api.hermes.speak');
+});
+
 Route::post('/guest/whatsapp/send', GuestKioskWhatsappController::class)
     ->middleware('throttle:10,1')
     ->name('guest.whatsapp.send');

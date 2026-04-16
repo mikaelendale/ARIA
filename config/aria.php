@@ -23,6 +23,14 @@ return [
     'kitchen_poll_interval_seconds' => max(5, (int) env('ARIA_KITCHEN_POLL_SECONDS', 15)),
 
     /*
+    | When set (e.g. 21), the overview only counts non-resolved issues created within this many days.
+    | Useful for demo/stage DBs with large historical incident tables. Null = all time.
+    */
+    'dashboard_open_incident_lookback_days' => ($v = env('ARIA_DASHBOARD_OPEN_INCIDENT_LOOKBACK_DAYS')) !== null && $v !== ''
+        ? max(1, (int) $v)
+        : null,
+
+    /*
     | Public /guest/voice kiosk: outbound WhatsApp uses the send_whatsapp tool to this
     | guest UUID only (set after seeding, e.g. a demo guest). Empty = send UI disabled.
     */

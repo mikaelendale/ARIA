@@ -2,7 +2,7 @@ import { GuestActivityMock } from '@/components/guest/guest-activity-mock';
 import { GuestGlanceMock } from '@/components/guest/guest-glance-mock';
 import { GuestWhatsAppMock, type WhatsappKioskProps } from '@/components/guest/guest-whatsapp-mock';
 import { HERMES } from '@/components/guest/hermes-brand';
-import { OrbDemo } from '@/components/guest/orb-demo';
+import { HermesVoiceOrb } from '@/components/guest/hermes-voice-orb';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
@@ -34,13 +34,9 @@ export function GuestKioskLayout({ whatsappKiosk }: { whatsappKiosk: WhatsappKio
                     <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-[0.2em]">Voice layer</p>
                     <h2 className="text-foreground mt-1 text-lg font-semibold tracking-tight">{HERMES.name}</h2>
                     <p className="text-muted-foreground mt-1 text-xs leading-snug">{HERMES.pitch}</p>
-                    <p className="text-muted-foreground mt-2 text-sm">
-                        Preview states: Idle · Listening · Talking — same agent class as{' '}
-                        <span className="text-foreground font-medium">HermesAgent</span> in the stack.
-                    </p>
                 </div>
-                <div className="flex w-full flex-1 flex-col items-center justify-center md:min-h-0">
-                    <OrbDemo embedded embeddedVariant="hero" />
+                <div className="flex w-full min-h-0 flex-1 flex-col items-center overflow-y-auto md:min-h-0 px-2">
+                    <HermesVoiceOrb />
                 </div>
             </section>
 

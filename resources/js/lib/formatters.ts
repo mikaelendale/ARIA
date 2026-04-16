@@ -31,6 +31,28 @@ export function formatRelativeTime(timestamp: string): string {
 }
 
 /** Short relative label for timelines (e.g. "3m ago", "2h ago"). */
+/** Human-readable wait from minute count (kitchen / SLA cards). */
+export function formatWaitDuration(minutes: number | null | undefined): string {
+    if (minutes == null || !Number.isFinite(minutes)) {
+        return '—';
+    }
+
+    const m = Math.round(Math.min(72 * 60, Math.max(0, minutes)));
+
+    if (m < 60) {
+        return `${m} min`;
+    }
+
+    const h = Math.floor(m / 60);
+    const rest = m % 60;
+
+    if (rest === 0) {
+        return `${h}h`;
+    }
+
+    return `${h}h ${rest}m`;
+}
+
 export function formatTimeAgo(iso: string): string {
     const diffMs = Date.now() - new Date(iso).getTime();
     const sec = Math.floor(diffMs / 1000);

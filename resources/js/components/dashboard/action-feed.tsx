@@ -130,7 +130,7 @@ export function ActionFeed({ initialActions }: ActionFeedProps) {
                                 <div
                                     key={item.id}
                                     className="flex gap-2.5 py-2.5 pl-1 pr-1"
-                                    title={`Reference: ${item.id}`}
+                                    title={`Step ${item.id.slice(0, 8)}…`}
                                 >
                                     <div
                                         className={cn('mt-1.5 size-1.5 shrink-0 rounded-full', dot)}

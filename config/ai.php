@@ -137,6 +137,10 @@ return [
                     'cheapest' => env('OPENAI_TEXT_MODEL', 'gpt-5-nano'), // keep default in sync with App\Ai\OpenAiTextDefaults::TEXT_MODEL_ID
                     'default' => env('OPENAI_TEXT_MODEL_DEFAULT', env('OPENAI_TEXT_MODEL', 'gpt-5-nano')),
                 ],
+                // tts-1 is ~2× faster than tts-1-hd; quality is fine for a voice kiosk.
+                'audio' => env('OPENAI_AUDIO_MODEL', 'tts-1'),
+                // whisper-1 is the only available transcription model.
+                'transcription' => env('OPENAI_TRANSCRIPTION_MODEL', 'whisper-1'),
             ],
         ],
 

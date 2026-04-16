@@ -163,7 +163,13 @@ class OpsData
 
     public static function openIncidentsCount(): int
     {
-        return Incident::query()->where('status', '!=', 'resolved')->count();
+        $q = Incident::query()->where('status', '!=', 'resolved');
+        $lookback = config('aria.dashboard_open_incident_lookback_days');
+        if (is_numeric($lookback) && (int) $lookback > 0) {
+            $q->where('created_at', '>=', now()->subDays((int) $lookback)->startOfDay());
+        }
+
+        return $q->count();
     }
 
     /**
@@ -230,7 +236,7 @@ class OpsData
         $guest->load([
             'bookings',
             'incidents',
-            'agentActions' => fn ($q) => $q->orderByDesc('fired_at'),
+            'agentActions' => fn ($q) => $q->orderByDesc('fired_at')->with('guest'),
         ]);
 
         return [
@@ -264,7 +270,7 @@ class OpsData
                 'id' => $a->id,
                 'agent' => strtolower((string) $a->agent_name),
                 'tool' => $a->tool_called,
-                'message' => (string) $a->result,
+                'message' => AgentActionFeedMessage::forFeed($a),
                 'status' => $a->status,
                 'timestamp' => optional($a->fired_at)?->toIso8601String(),
                 'revenueImpact' => (float) $a->revenue_impact,
@@ -298,21 +304,23 @@ class OpsData
      */
     public static function incidentDetail(Incident $incident): array
     {
-        $incident->load(['agentActions' => fn ($q) => $q->orderBy('fired_at')]);
+        $incident->load(['agentActions' => fn ($q) => $q->orderBy('fired_at')->with('guest')]);
 
         return [
             'id' => $incident->id,
             'type' => $incident->type,
             'severity' => $incident->severity,
             'status' => $incident->status,
-            'description' => $incident->description,
+            'description' => $incident->description
+                ? PublicMessageSanitizer::forDisplay((string) $incident->description)
+                : null,
             'resolutionTime' => $incident->resolution_time_seconds ? $incident->resolution_time_seconds.'s' : null,
             'createdAt' => optional($incident->created_at)?->toIso8601String() ?? now()->toIso8601String(),
             'agentActions' => $incident->agentActions->map(fn (AgentAction $a) => [
                 'id' => $a->id,
                 'agent' => strtolower((string) $a->agent_name),
                 'tool' => $a->tool_called,
-                'message' => (string) $a->result,
+                'message' => AgentActionFeedMessage::forFeed($a),
                 'status' => $a->status,
                 'timestamp' => optional($a->fired_at)?->toIso8601String(),
                 'revenueImpact' => (float) $a->revenue_impact,

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\AgentAction;
+use App\Models\Booking;
 use App\Models\Guest;
 use App\Models\Incident;
 use App\Models\Room;
@@ -20,6 +21,7 @@ class DemoStorySeeder extends Seeder
     public function run(): void
     {
         AgentAction::query()->delete();
+        Booking::query()->delete();
         Incident::query()->delete();
         RoomServiceOrder::query()->delete();
 
@@ -37,6 +39,7 @@ class DemoStorySeeder extends Seeder
 
         $this->seedOccupancy();
         $this->tuneGuestChurnScores($guests);
+        $this->seedBookingsLastMonth($guests);
 
         $g = static fn (int $i): Guest => $guests[$i];
 
@@ -157,6 +160,11 @@ class DemoStorySeeder extends Seeder
 
             // Latest heartbeat
             [$g(0)->id, null, 'orchestrator', 'log_incident', 'Orchestrator heartbeat: queues healthy; last cross-agent handoff '.$g(0)->room_number.' breakfast thread.', 0.0, $t('-3 minutes'), []],
+
+            // Today — visible on overview "AI-linked revenue" and revenue window
+            [$g(5)->id, null, 'pulse', 'adjust_pricing', 'Morning yield: modest BAR lift on deluxe lakefront; packages unchanged for repeat guests.', 5600.0, now()->subMinutes(45), ['scope' => 'kuriftu_lakeside']],
+            [$g(6)->id, null, 'pulse', 'send_promo', 'Lunch patio campaign — light touch WhatsApp to in-house guests with F&B preference tags.', 3200.0, now()->subMinutes(22), ['campaign' => 'patio_lunch']],
+            [$g(7)->id, null, 'orchestrator', 'book_experience', 'Concierge upsell: sunset boat — guest accepted; revenue logged on confirmation.', 2400.0, now()->subMinutes(14), []],
         ];
 
         foreach ($rows as $row) {
@@ -190,6 +198,38 @@ class DemoStorySeeder extends Seeder
             }
 
             $guests[$i]->forceFill(['churn_risk_score' => $score])->saveQuietly();
+        }
+    }
+
+    /**
+     * @param  Collection<int, Guest>  $guests
+     */
+    protected function seedBookingsLastMonth(Collection $guests): void
+    {
+        $tz = config('app.timezone');
+        $roomTypes = ['Deluxe Lake', 'Garden Villa', 'Standard Garden', 'Executive Suite'];
+        $guestList = $guests->values();
+        $nGuests = $guestList->count();
+
+        for ($dayOffset = 0; $dayOffset < 28; $dayOffset++) {
+            $checkIn = Carbon::now($tz)->subDays(27 - $dayOffset)->startOfDay();
+            $bookingsThisDay = 1 + ($dayOffset % 4);
+
+            for ($b = 0; $b < $bookingsThisDay; $b++) {
+                $guest = $guestList[($dayOffset + $b * 2) % $nGuests];
+                $nights = 2 + (($dayOffset + $b) % 4);
+                $amount = 11200 + ($dayOffset * 210) + ($b * 1640) + (($dayOffset % 7) * 380);
+
+                Booking::query()->create([
+                    'guest_id' => $guest->id,
+                    'room_number' => (string) $guest->room_number,
+                    'room_type' => $roomTypes[($dayOffset + $b) % count($roomTypes)],
+                    'check_in_date' => $checkIn->copy(),
+                    'check_out_date' => $checkIn->copy()->addDays($nights),
+                    'status' => 'confirmed',
+                    'total_amount' => (string) $amount,
+                ]);
+            }
         }
     }
 

@@ -129,7 +129,7 @@ final class KitchenBoardPresenter
         $oldest = $pending[0];
         $room = (string) ($oldest['roomNumber'] ?? '');
         $wait = $oldest['waitMinutes'];
-        $waitText = is_int($wait) ? sprintf('%d minutes', $wait) : 'a short while';
+        $waitText = is_numeric($wait) ? sprintf('%d minutes', (int) $wait) : 'a short while';
 
         $delayedN = count(array_filter($pending, fn (array $o) => ($o['pastSentinelSla'] ?? false) === true));
 
@@ -186,7 +186,7 @@ final class KitchenBoardPresenter
                     'id' => $action->id,
                     'agent' => strtolower((string) $action->agent_name),
                     'tool' => $action->tool_called,
-                    'message' => Str::limit((string) $action->result, 200),
+                    'message' => Str::limit(AgentActionFeedMessage::forFeed($action), 200),
                     'timestamp' => optional($action->fired_at)?->toIso8601String() ?? now()->toIso8601String(),
                     'roomHint' => $room ? (string) $room : null,
                 ];
@@ -201,14 +201,15 @@ final class KitchenBoardPresenter
     protected static function serializeOrder(RoomServiceOrder $order, int $delayMinutes): array
     {
         $placed = $order->placed_at;
-        $waitMinutes = $placed ? $placed->diffInMinutes(now()) : null;
-        $pastSla = is_int($waitMinutes) && $waitMinutes >= $delayMinutes;
+        $waitMinutes = $placed !== null ? self::normalizeWaitMinutes($placed) : null;
+        $pastSla = $waitMinutes !== null && $waitMinutes >= $delayMinutes;
 
         $guest = $order->guest;
         $steps = [];
 
         if ($guest !== null) {
             $steps = AgentAction::query()
+                ->with('guest')
                 ->where('guest_id', $guest->id)
                 ->where('fired_at', '>=', $placed ?? now()->subDay())
                 ->latest('fired_at')
@@ -218,7 +219,7 @@ final class KitchenBoardPresenter
                     'id' => $a->id,
                     'agent' => strtolower((string) $a->agent_name),
                     'tool' => $a->tool_called,
-                    'message' => Str::limit((string) $a->result, 180),
+                    'message' => Str::limit(AgentActionFeedMessage::forFeed($a), 180),
                     'timestamp' => optional($a->fired_at)?->toIso8601String() ?? now()->toIso8601String(),
                 ])
                 ->values()
@@ -363,7 +364,7 @@ final class KitchenBoardPresenter
             $lines[] = 'Last recorded guest touchpoint: '.$guest->last_interaction_at->diffForHumans().' (from ARIA logs).';
         }
 
-        if (is_int($waitMinutes)) {
+        if ($waitMinutes !== null) {
             $lines[] = sprintf('On the pass %d minutes — Sentinel watches at %d minutes.', $waitMinutes, $delayMinutes);
         }
 
@@ -391,10 +392,20 @@ final class KitchenBoardPresenter
             return 'elevated';
         }
 
-        if (is_int($waitMinutes) && $waitMinutes >= 20) {
+        if ($waitMinutes !== null && $waitMinutes >= 20) {
             return 'elevated';
         }
 
         return 'standard';
+    }
+
+    /**
+     * Carbon 3 returns fractional minutes from {@see Carbon::diffInMinutes()}; normalize for UI + SLA math.
+     */
+    protected static function normalizeWaitMinutes(Carbon $placed): int
+    {
+        $raw = (float) $placed->diffInMinutes(now(), true);
+
+        return max(0, min(72 * 60, (int) round($raw)));
     }
 }
